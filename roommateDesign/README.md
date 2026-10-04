@@ -23,6 +23,27 @@ To test on a phone on the same Wi-Fi, set `PUBLIC_URL=http://<your-laptop-ip>:30
 
 Add `&theme=dark` to an instructor URL for a dark slide. The default is light.
 
+## Fake class (test data)
+
+`scripts/fake-class.js` joins pretend students to the current session from your laptop. It works against local or Railway.
+
+```sh
+# 25 students into the current session
+npm run fake -- --url https://<app>.up.railway.app --key <INSTRUCTOR_KEY>
+
+# fresh session, one student every 1.5 s (watch the results slide update live)
+npm run fake -- --url https://<app>.up.railway.app --key <KEY> --new --delay 1500
+```
+
+Options: `--n 25`, `--delay <ms>`, `--new` (replaces the current session), `--code ABCD` (no key needed).
+Fake students' IDs start with `fake-`. They cluster around four "personas", so the graph has structure.
+Before class, click **New session** on the welcome slide to clear fake data.
+
+## Check which version is deployed
+
+`https://<app>.up.railway.app/version` returns the running commit, for example `{"commit":"3df4b56",...}`.
+Compare it with `git log -1 --format=%h` after a push.
+
 ## Deploy on Railway
 
 1. New Project → Deploy from GitHub repo → `djjr/class-activities`.

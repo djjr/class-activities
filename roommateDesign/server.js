@@ -170,6 +170,12 @@ app.get('/i/welcome', page('welcome.html'));
 app.get('/i/aggregate', page('aggregate.html'));
 app.get('/i/sessions', page('sessions.html'));
 app.get('/healthz', (req, res) => res.send('ok'));
+// Which commit is running (Railway sets RAILWAY_GIT_COMMIT_SHA on GitHub deploys).
+const STARTED_AT = new Date().toISOString();
+app.get('/version', (req, res) => res.json({
+  commit: (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7),
+  startedAt: STARTED_AT,
+}));
 
 function baseUrl(req) {
   return PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
