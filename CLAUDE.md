@@ -66,6 +66,11 @@ Visual checks need the Claude in Chrome extension, which was not connected in th
 ## Open items
 
 - Optional: serve pages without the `.html` ending (`express.static(..., { extensions: ['html'] })`), so `/test/fake-class` works.
-- Optional: fall back to `RAILWAY_VOLUME_MOUNT_PATH` when `DATA_DIR` is unset. A volume-attach conflict hit during setup; confirm saves land on the volume, i.e. saved sessions survive a redeploy.
+- **Saved sessions don't survive a redeploy** (low priority; parked by Dan, 2026-10-04).
+  - Repro: save a few sessions, Redeploy in Railway, `/i/sessions` is empty.
+  - Conflicting evidence: Railway's assistant says a volume is attached at `/data` and that it can see `live.json` on it. But the Variables tab lists no `RAILWAY_VOLUME_*` variables, and `DATA_DIR` was not confirmed set.
+  - First step: make `/version` report the resolved `DATA_DIR`, `RAILWAY_VOLUME_MOUNT_PATH`, and the files in `saved/`. Then fall back to `RAILWAY_VOLUME_MOUNT_PATH` when `DATA_DIR` is unset.
+  - Workaround in use: download each save's JSON from `/i/sessions` right after saving. Dan verified the downloaded JSON looks right.
+  - Also implies the mid-class `live.json` backup may not survive a redeploy, so don't push to `main` during class.
 - Not yet done: a visual pass of the student page at phone width, and of the results slide inside an actual slides.com iframe.
 - Future activities go in sibling folders. Generalize shared pieces (session/QR/SSE) only when a second activity actually needs them.
