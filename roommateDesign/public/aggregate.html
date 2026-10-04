@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate — Results</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="slide">
+    <div class="ctrl">
+      <h1 style="margin:0">Our robot roommates</h1>
+      <span class="spacer"></span>
+      <span id="count" class="count"></span>
+      <label class="toggle"><input id="names" type="checkbox"> Show names</label>
+      <button id="closeBtn">Close submissions</button>
+      <button id="saveBtn">Save</button>
+      <span id="msg" class="small muted"></span>
+    </div>
+    <div id="root"></div>
+  </main>
+
+  <script src="/results.js"></script>
+  <script src="/instructor.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    let results = null, closed = false;
+
+    function flash(text) {
+      $('msg').textContent = text;
+      setTimeout(() => { if ($('msg').textContent === text) $('msg').textContent = ''; }, 4000);
+    }
+
+    async function start() {
+      try {
+        await iapi('current'); // creates a session if none exists
+      } catch (e) {
+        return flash(e.message);
+      }
+      // Virtue list comes with the aggregate; build the view on first message.
+      istream(msg => {
+        if (!msg.session) return;
+        closed = msg.session.closed;
+        $('closeBtn').textContent = closed ? 'Reopen submissions' : 'Close submissions';
+        $('count').textContent = `${msg.session.code} · ${msg.counts.joined} joined · ${msg.counts.submitted} submitted${closed ? ' · closed' : ''}`;
+        if (!results) results = Results.create($('root'), { virtues: msg.virtues, instructor: true });
+        results.update(msg.aggregate, { showNames: $('names').checked });
+      });
+    }
+
+    $('names').addEventListener('change', () => results && results.setShowNames($('names').checked));
+
+    $('closeBtn').addEventListener('click', async () => {
+      try { await iapi(closed ? 'reopen' : 'close', 'POST'); } catch (e) { flash(e.message); }
+    });
+
+    $('saveBtn').addEventListener('click', async () => {
+      try {
+        const r = await iapi('save', 'POST');
+        flash(`Saved ${new Date(r.savedAt).toLocaleTimeString()}`);
+      } catch (e) { flash(e.message); }
+    });
+
+    start();
+  </script>
+</body>
+</html>

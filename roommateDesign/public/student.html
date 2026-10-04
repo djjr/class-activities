@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Loading / error -->
+  <section id="msgScreen" class="wrap">
+    <p id="msgText" class="muted">Loading…</p>
+  </section>
+
+  <!-- Join -->
+  <section id="joinScreen" class="wrap" hidden>
+    <div class="card">
+      <h1>Design a Robot Roommate</h1>
+      <p>You'll choose up to <strong class="budgetN">5</strong> virtues for your robot roommate, then think about how it could go wrong.</p>
+      <p class="muted small">All fields are optional. Your instructor may see your name next to what you write; classmates won't.</p>
+      <form id="joinForm">
+        <label for="jName">Name</label>
+        <input id="jName" type="text" maxlength="40" autocomplete="name">
+        <label for="jNick">Nickname</label>
+        <input id="jNick" type="text" maxlength="40">
+        <label for="jGroup">Group</label>
+        <input id="jGroup" type="text" maxlength="40">
+        <div class="row" style="margin-top:1em">
+          <button class="primary" type="submit">Start designing</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Main -->
+  <section id="mainScreen" hidden>
+    <div class="topbar">
+      <div class="tabs" role="tablist">
+        <button id="tabDesign" role="tab" aria-selected="true">My design</button>
+        <button id="tabResults" role="tab" aria-selected="false">Class results</button>
+      </div>
+      <span class="spacer"></span>
+      <span id="budget" class="budget">0 / 5</span>
+    </div>
+
+    <div class="wrap">
+      <div id="closedBanner" class="banner warn" hidden>Submissions are closed.</div>
+
+      <div id="designPane">
+        <p class="small muted">Tap a virtue to move it between columns. Tap ✎ to describe how it could fail.</p>
+        <div class="board">
+          <div class="zone selected" data-zone="selected">
+            <h2>Selected</h2>
+            <div class="pills" id="selectedPills"></div>
+          </div>
+          <div class="zone" data-zone="unselected">
+            <h2>Not selected</h2>
+            <div class="pills" id="unselectedPills"></div>
+          </div>
+        </div>
+        <div class="submitbar">
+          <button id="submitBtn" class="primary">Submit</button>
+          <span id="status" class="status">Not submitted yet</span>
+        </div>
+      </div>
+
+      <div id="resultsPane" hidden>
+        <p id="resultsLocked" class="banner">Submit your design to see the class results.</p>
+        <div id="resultsRoot"></div>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="noteDlg">
+    <form method="dialog">
+      <span id="dlgTag" class="mode-tag"></span>
+      <h2 id="dlgTitle" style="margin-top:.4em"></h2>
+      <p id="dlgDef" class="small muted"></p>
+      <label for="dlgFailure" id="dlgPrompt"></label>
+      <textarea id="dlgFailure" maxlength="1000"></textarea>
+      <label for="dlgWork">Workarounds that could soften this</label>
+      <textarea id="dlgWork" maxlength="1000"></textarea>
+      <div class="row" style="margin-top:1em">
+        <span class="spacer"></span>
+        <button class="primary" value="done">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/results.js"></script>
+  <script src="/student.js"></script>
+</body>
+</html>

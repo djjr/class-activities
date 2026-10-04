@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate — Saved sessions</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>Saved sessions</h1>
+    <div id="list" class="card"><p class="muted">Loading…</p></div>
+  </main>
+  <script src="/instructor.js"></script>
+  <script>
+    (async () => {
+      const box = document.getElementById('list');
+      try {
+        const list = await iapi('saved');
+        if (!list.length) { box.innerHTML = '<p class="muted">No saved sessions yet.</p>'; return; }
+        box.replaceChildren(...list.map(s => {
+          const row = document.createElement('p');
+          const a = document.createElement('a');
+          a.href = `/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}`;
+          a.textContent = `${new Date(s.createdAt).toLocaleString()} — ${s.code}`;
+          row.append(a, ` · ${s.nSubmitted} submitted · saved ${new Date(s.savedAt).toLocaleString()}`);
+          return row;
+        }));
+      } catch (e) {
+        box.textContent = e.message;
+      }
+    })();
+  </script>
+</body>
+</html>

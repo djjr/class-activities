@@ -1,0 +1,18 @@
+{
+  "name": "roommate-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Classroom activity: design a robot roommate within a virtue budget, with live class results.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "qrcode": "^1.5.4"
+  }
+}

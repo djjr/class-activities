@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate — Join</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="welcome">
+    <div>
+      <h1>Design a Robot Roommate</h1>
+      <p class="muted">Scan to join, or go to the address below</p>
+      <div id="qr" class="qr"></div>
+      <div id="code" class="code"></div>
+      <div id="url" class="url muted"></div>
+      <div id="count" class="count"></div>
+      <p id="err" class="muted"></p>
+    </div>
+  </main>
+  <div class="corner"><button id="newBtn" class="link small">New session</button></div>
+
+  <script src="/instructor.js"></script>
+  <script>
+    let shownCode = null;
+
+    async function refresh() {
+      try {
+        const cur = await iapi('current');
+        shownCode = cur.code;
+        document.getElementById('qr').innerHTML = cur.qrSvg; // server-generated SVG
+        document.getElementById('code').textContent = cur.code;
+        document.getElementById('url').textContent = cur.joinUrl.replace(/^https?:\/\//, '');
+        document.getElementById('err').textContent = '';
+      } catch (e) {
+        document.getElementById('err').textContent = e.message;
+      }
+    }
+
+    istream(msg => {
+      if (!msg.session) return;
+      if (msg.session.code !== shownCode) refresh();
+      const { joined, submitted } = msg.counts;
+      document.getElementById('count').textContent = `${joined} joined · ${submitted} submitted`;
+    });
+
+    confirmButton(document.getElementById('newBtn'), 'Click again to start a new session', async () => {
+      await iapi('new', 'POST');
+      refresh();
+    });
+
+    refresh();
+  </script>
+</body>
+</html>

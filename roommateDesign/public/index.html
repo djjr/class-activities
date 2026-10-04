@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="wrap" style="max-width:420px">
+    <div class="card" style="margin-top:10vh">
+      <h1>Design a Robot Roommate</h1>
+      <form id="f">
+        <label for="code">Session code</label>
+        <input id="code" type="text" maxlength="4" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.2em;font-size:1.4rem">
+        <div class="row" style="margin-top:1em"><button class="primary">Join</button></div>
+      </form>
+    </div>
+  </main>
+  <script>
+    document.getElementById('f').addEventListener('submit', e => {
+      e.preventDefault();
+      const c = document.getElementById('code').value.trim().toUpperCase();
+      if (c) location.href = '/s/' + encodeURIComponent(c);
+    });
+  </script>
+</body>
+</html>
