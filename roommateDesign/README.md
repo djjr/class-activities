@@ -25,19 +25,21 @@ Add `&theme=dark` to an instructor URL for a dark slide. The default is light.
 
 ## Fake class (test data)
 
-`scripts/fake-class.js` joins pretend students to the current session from your laptop. It works against local or Railway.
+From any browser, open:
 
-```sh
-# 25 students into the current session
-npm run fake -- --url https://<app>.up.railway.app --key <INSTRUCTOR_KEY>
-
-# fresh session, one student every 1.5 s (watch the results slide update live)
-npm run fake -- --url https://<app>.up.railway.app --key <KEY> --new --delay 1500
+```
+https://<app>.up.railway.app/test/fake-class.html?key=<INSTRUCTOR_KEY>
 ```
 
-Options: `--n 25`, `--delay <ms>`, `--new` (replaces the current session), `--code ABCD` (no key needed).
-Fake students' IDs start with `fake-`. They cluster around four "personas", so the graph has structure.
-Before class, click **New session** on the welcome slide to clear fake data.
+Choose how many students to add, an optional delay between them (for example 1500 ms, to watch the results slide fill in live), and whether to start a fresh session first. The page also links to the welcome, results and saved-sessions pages, and shows which commit the server is running.
+
+The same generator also runs from a terminal:
+
+```sh
+npm run fake -- --url https://<app>.up.railway.app --key <KEY> [--n 25] [--delay 1500] [--new] [--code ABCD]
+```
+
+The generator lives in `public/test/fake-class.js`, shared by the page and `scripts/fake-class.js`. Fake students' IDs start with `fake-`, and their picks cluster around four "personas" so the graph has structure. Before class, click **New session** on the welcome slide to clear fake data.
 
 ## Check which version is deployed
 

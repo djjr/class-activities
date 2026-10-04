@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fake Class</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .grid { display: grid; grid-template-columns: auto 1fr; gap: .5em .8em; align-items: center; }
+    .grid label { margin: 0; }
+    .grid input[type=number] { width: 7em; padding: .4em .5em; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    #log { white-space: pre-wrap; font: .85rem ui-monospace, SFMono-Regular, Menlo, monospace; max-height: 50vh; overflow: auto; margin: 0; }
+    .links a { margin-right: 1em; }
+  </style>
+</head>
+<body>
+  <main class="wrap" style="max-width:720px">
+    <h1>Fake class</h1>
+    <p class="muted small">Adds pretend students to the current session for testing. Click <strong>New session</strong> on the welcome slide before real class to clear them.</p>
+
+    <div class="card">
+      <div class="grid">
+        <label for="n">Students</label>
+        <input id="n" type="number" min="1" max="200" value="25">
+        <label for="delay">Delay (ms)</label>
+        <div class="row"><input id="delay" type="number" min="0" step="250" value="0"><span class="small muted">e.g. 1500 to watch results arrive live</span></div>
+        <label for="fresh">New session</label>
+        <label class="toggle" style="font-weight:400"><input id="fresh" type="checkbox"> Start a fresh session first (replaces the current one)</label>
+      </div>
+      <div class="row" style="margin-top:1em">
+        <button id="runBtn" class="primary">Add students</button>
+        <button id="stopBtn" disabled>Stop</button>
+        <span class="spacer"></span>
+        <span id="version" class="small muted"></span>
+      </div>
+    </div>
+
+    <p class="links small" style="margin:1em 0">
+      Open: <a id="lWelcome" target="_blank">Welcome / QR</a><a id="lResults" target="_blank">Results</a><a id="lSessions" target="_blank">Saved sessions</a>
+    </p>
+
+    <div class="card"><pre id="log" class="muted">Ready.</pre></div>
+  </main>
+
+  <script src="/instructor.js"></script>
+  <script src="/test/fake-class.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const q = `?key=${encodeURIComponent(KEY)}`;
+    $('lWelcome').href = '/i/welcome' + q;
+    $('lResults').href = '/i/aggregate' + q;
+    $('lSessions').href = '/i/sessions' + q;
+
+    fetch('/version').then(r => r.json()).then(v => {
+      $('version').textContent = `server ${v.commit}, started ${new Date(v.startedAt).toLocaleString()}`;
+    }).catch(() => {});
+
+    let stop = false;
+    function log(line) {
+      $('log').textContent += '\n' + line;
+      $('log').scrollTop = $('log').scrollHeight;
+    }
+
+    $('stopBtn').addEventListener('click', () => { stop = true; });
+    $('runBtn').addEventListener('click', async () => {
+      stop = false;
+      $('runBtn').disabled = true;
+      $('stopBtn').disabled = false;
+      $('log').textContent = 'Starting…';
+      try {
+        await FakeClass.run({
+          key: KEY,
+          n: Number($('n').value) || 25,
+          delay: Number($('delay').value) || 0,
+          newSession: $('fresh').checked,
+          log,
+          shouldStop: () => stop,
+        });
+      } catch (e) {
+        log('Error: ' + e.message);
+      }
+      $('runBtn').disabled = false;
+      $('stopBtn').disabled = true;
+    });
+
+    if (!KEY) log('No key in the URL. Add ?key=<INSTRUCTOR_KEY>.');
+  </script>
+</body>
+</html>
