@@ -67,21 +67,32 @@ Students design a robot roommate by choosing virtues within a budget. They then 
 
 ## Results view
 
-Students can open it after submitting, or once submissions are closed. The instructor's slide shows it live.
+Students can open it after submitting, or once submissions are closed. The instructor's slide shows it live. The writeups are the substance of the exercise, so the layout centers on them:
 
-1. **Frequency.** A bar chart of how many students picked each virtue, sorted by count. Each bar shows `n` and a percentage. On a student's view, their own picks are highlighted.
-2. **Co-selection graph** (a force-directed graph; a small hand-written layout in `results.js`, no library):
-   - Each virtue is a node, sized by how often it was picked.
-   - An edge joins two virtues that were picked together **more often than chance**: lift > 1, with at least 2 students. Edge thickness is the lift. Clusters form on their own.
-   - Using lift rather than raw counts stops the most popular virtues from connecting to everything.
-   - The graph appears once there are at least 5 submissions. Before that, a placeholder says it is waiting for more data.
-   - **The graph is live and springy.** It animates as it settles, and anyone can drag a node: strongly linked partners follow, and the node springs back on release. A press that moves less than 6px counts as a tap and opens the writeups.
-   - **Shake** scatters the nodes and lets them resettle; clusters that reappear are real. New submissions nudge the layout from its current positions instead of restarting it.
-   - On phones, touching the graph drags nodes rather than scrolling the page.
-3. **Writeups.** Tapping any virtue, as a bar or a node, opens a panel with two lists:
-   - **Failures when included (excess)**, each with its workarounds.
-   - **Failures when excluded (missing)**, each with its workarounds.
+```
+┌ Virtues chosen ───────────────┐ ┌ ‹      Empathy          › ┐
+│   (graph: size = # picked,    │ │ Picked by 13 of 25 · 1/12  │
+│    lines = picked together)   │ │ INCLUDED  Too much (4)     │
+│   tap a virtue → panel        │ │   failure… ↳ workaround…   │
+│                               │ │ EXCLUDED  Missing (3)      │
+└───────────────────────────────┘ └────────────────────────────┘
+```
+
+Wide screens show two columns: the graph on the left and the writeup panel on the right. The panel scrolls inside its own column. Phones stack them, and tapping a virtue scrolls down to its panel.
+
+1. **Graph (left), the navigator.**
+   - Each virtue is a node labelled with its count, e.g. "Empathy · 13". Circle area is relative to the most-picked virtue. A dashed circle means nobody picked it.
+   - An edge joins two virtues picked together **more often than chance**: lift > 1, with at least 2 students. Its thickness and pull grow with lift, so weak links barely matter and strong ones form clusters.
+   - The graph is live and springy: drag a node and its linked partners follow, then it springs back on release. A press that moves less than 6px is a tap. Each node has an invisible tap target at least 16 units in radius, and its label is tappable too.
+   - **Shake** scatters the nodes and lets them resettle; clusters that reappear are real. New submissions nudge the layout instead of restarting it. On phones, touching the graph drags nodes rather than scrolling.
+   - The graph appears once there are at least 5 submissions. The panel works before that.
+2. **Writeup panel (right), the main content.**
+   - It opens on the virtue with the most writeups. **‹ ›** step through virtues in order of popularity, for walking the class through them one by one.
+   - The header shows "Picked by k of n", the position in that order, and, for students, "★ in your design".
+   - Two sections: **Included: fails when there's too much (k)** and **Excluded: fails when it's missing (k)**. Each failure mode has its workaround indented beneath it.
    - Instructor view: a **Show names** toggle, off by default, attributes each entry to its author's nickname or name. Students always see anonymous entries.
+
+There is no separate frequency chart: counts are in the graph labels and the panel header.
 
 The instructor slide also keeps the **Close Submissions** and **Save** controls and the "N joined / M submitted" count.
 

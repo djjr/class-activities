@@ -146,41 +146,42 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 /* ---------- Results ---------- */
 
 .results { display: grid; gap: 16px; grid-template-columns: 1fr; }
-@media (min-width: 720px) { .results { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 720px) {
+  .results { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  /* Writeups scroll inside their column so the slide never needs to scroll. */
+  .results .writeups { max-height: calc(100vh - 90px); overflow: auto; position: sticky; top: 8px; }
+}
 .results .card { min-width: 0; }
 
-.bars { display: grid; gap: 4px; }
-.bar {
-  display: grid; grid-template-columns: minmax(7em, 40%) 1fr 3.5em; align-items: center; gap: .5em;
-  padding: 3px 4px; border-radius: 6px; cursor: pointer; border: none; background: none; text-align: left;
-}
-.bar:hover, .bar.active { background: var(--accent-soft); }
-.bar .lbl { font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar .lbl.mine::before { content: "★ "; color: var(--accent); }
-.bar .track { height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
-.bar .fill { height: 100%; background: var(--accent); border-radius: 7px; transition: width .4s; }
-.bar .num { font-size: .8rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
-
-.graph svg { width: 100%; height: auto; display: block; }
+.graph svg { width: 100%; height: auto; display: block; touch-action: none; } /* drag nodes on phones without scrolling */
 .graph .edge { stroke: var(--accent); stroke-opacity: .45; }
-.graph .node circle { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; cursor: pointer; }
-.graph .node.mine circle { fill: var(--accent); }
-.graph .node.zero circle { fill: var(--surface); stroke-dasharray: 3 3; stroke: var(--muted); }
-.graph .node.active circle { stroke-width: 4; }
-.graph .node text { font-size: 11px; fill: var(--ink); text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.graph .node { cursor: grab; }
+.graph .node:active { cursor: grabbing; }
+.graph .node .hit { fill: transparent; stroke: none; }
+.graph .node .dot { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; }
+.graph .node.mine .dot { fill: var(--accent); }
+.graph .node.zero .dot { fill: var(--surface); stroke-dasharray: 3 3; stroke: var(--muted); }
+.graph .node.active .dot { stroke-width: 4; stroke: var(--ink); }
+.graph .node.active text { font-weight: 700; }
+.graph .node text { font-size: 11px; fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
 .graph .waiting { padding: 2em 1em; text-align: center; color: var(--muted); }
 
-.writeups { grid-column: 1 / -1; }
-.writeups .cols { display: grid; gap: 16px; grid-template-columns: 1fr; }
-@media (min-width: 720px) { .writeups .cols { grid-template-columns: 1fr 1fr; } }
+.writeups .panel-head { flex-wrap: nowrap; align-items: flex-start; }
+.writeups .panel-title { flex: 1; min-width: 0; text-align: center; }
+.writeups .panel-title h2 { margin-bottom: .1em; }
+.writeups .nav { flex: none; width: 2.4em; height: 2.4em; padding: 0; font-size: 1.3rem; line-height: 1; }
+.writeups .mine-tag { margin-left: .5em; color: var(--accent); font-weight: 600; }
+.writeups .def { text-align: center; margin: .4em 0 1em; }
+.writeups section { margin-top: 1em; }
 .writeups ul { list-style: none; padding: 0; margin: 0; }
-.writeups li { border-left: 3px solid var(--accent); padding: .3em .7em; margin: .5em 0; }
+.writeups li { border-left: 3px solid var(--accent); padding: .35em .8em; margin: .6em 0; }
 .writeups .missing li { border-color: var(--missing); }
-.writeups .wa { color: var(--muted); font-size: .9rem; margin-top: .2em; }
-.writeups .wa::before { content: "Workaround: "; font-weight: 600; }
+.writeups pre { white-space: pre-wrap; font: inherit; margin: 0; }
+.writeups .fm { font-size: 1.02rem; }
+.writeups .wa { color: var(--muted); font-size: .9rem; margin: .3em 0 0 1em; }
+.writeups .wa::before { content: "↳ Workaround: "; font-weight: 600; }
 .writeups .author { font-size: .8rem; font-weight: 700; color: var(--muted); }
 .writeups .none { color: var(--muted); font-style: italic; }
-.writeups pre { white-space: pre-wrap; font: inherit; margin: 0; }
 
 /* ---------- Instructor slides ---------- */
 
@@ -198,6 +199,3 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 .welcome .url { font-size: clamp(.9rem, 1.8vw, 1.2rem); word-break: break-all; }
 .welcome .count { font-size: 1.1rem; margin-top: .6em; }
 .corner { position: fixed; bottom: 8px; right: 10px; }
-.graph svg { touch-action: none; } /* drag nodes on phones without scrolling the page */
-.graph .node { cursor: grab; }
-.graph .node:active { cursor: grabbing; }

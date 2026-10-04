@@ -48,12 +48,14 @@
       const lines = wrapLabel(v.label);
       const n = {
         id: v.id, x: cx + 120 * Math.cos(a), y: cy + 110 * Math.sin(a), vx: 0, vy: 0, r: 8,
-        fx: null, fy: null,
+        fx: null, fy: null, lines,
         title: el('title', {}),
-        circle: el('circle', {}),
-        text: el('text', {}, ...lines.map((t, k) => el('tspan', { dy: k ? 12 : 0 }, t))),
+        hit: el('circle', { class: 'hit' }), // larger invisible tap target
+        circle: el('circle', { class: 'dot' }),
+        spans: lines.map((t, k) => el('tspan', { dy: k ? 12 : 0 }, t)),
       };
-      n.g = el('g', { class: 'node' }, n.title, n.circle, n.text);
+      n.text = el('text', {}, ...n.spans);
+      n.g = el('g', { class: 'node' }, n.title, n.hit, n.circle, n.text);
       nodeLayer.append(n.g);
       attachDrag(n);
       return n;
@@ -102,7 +104,7 @@
           const a = nodes[i], b = nodes[j];
           const x = a.x - b.x, y = a.y - b.y;
           const d2 = Math.max(x * x + y * y, 1), d = Math.sqrt(d2);
-          const f = (3000 / d2) * alpha;
+          const f = (2500 / d2) * alpha;
           a.vx += (x / d) * f; a.vy += (y / d) * f;
           b.vx -= (x / d) * f; b.vy -= (y / d) * f;
         }
@@ -110,8 +112,10 @@
       for (const e of edges) {
         const a = byId[e.a], b = byId[e.b];
         const x = b.x - a.x, y = b.y - a.y, d = Math.max(Math.hypot(x, y), 1);
-        const target = Math.max(60, 150 / e.lift);
-        const f = 0.06 * (d - target) * Math.min(e.lift, 3) * alpha;
+        // Pull grows with the square of how far above chance the pair is,
+        // so weak links barely tug and strong ones form visible clusters.
+        const target = 40;
+        const f = 0.2 * (d - target) * Math.min(e.lift - 1, 2) ** 2 * alpha;
         a.vx += (x / d) * f; a.vy += (y / d) * f;
         b.vx -= (x / d) * f; b.vy -= (y / d) * f;
       }
@@ -134,8 +138,11 @@
         n.circle.setAttribute('cx', n.x);
         n.circle.setAttribute('cy', n.y);
         n.circle.setAttribute('r', n.r);
+        n.hit.setAttribute('cx', n.x);
+        n.hit.setAttribute('cy', n.y);
+        n.hit.setAttribute('r', Math.max(n.r + 4, 16));
         n.text.setAttribute('y', n.y + n.r + 12);
-        for (const t of n.text.children) t.setAttribute('x', n.x);
+        for (const t of n.spans) t.setAttribute('x', n.x);
       }
       for (const e of edges) {
         const a = byId[e.a], b = byId[e.b];
@@ -166,9 +173,12 @@
         svg.style.display = enough ? '' : 'none';
         waiting.textContent = `Waiting for more designs (${n} of ${MIN_FOR_GRAPH} needed)…`;
         const v = Object.fromEntries(virtues.map(x => [x.id, x]));
+        // Area tracks count relative to the most-picked virtue: 5 (none) to 14 (most).
+        const maxCount = Math.max(1, ...Object.values(counts));
         for (const nd of nodes) {
-          nd.r = 7 + 20 * Math.sqrt(n ? counts[nd.id] / n : 0);
+          nd.r = 5 + 9 * Math.sqrt(counts[nd.id] / maxCount);
           nd.title.textContent = `${v[nd.id].label}: ${counts[nd.id]}`;
+          nd.spans[nd.spans.length - 1].textContent = `${nd.lines[nd.lines.length - 1]} · ${counts[nd.id]}`;
           nd.g.setAttribute('class', ['node', mine.has(nd.id) && 'mine', counts[nd.id] === 0 && 'zero', active === nd.id && 'active']
             .filter(Boolean).join(' '));
         }
@@ -194,82 +204,86 @@
     };
   }
 
+  // Virtues in teaching order: most picked first.
+  function ordered(virtues, counts) {
+    return [...virtues].sort((a, b) => counts[b.id] - counts[a.id] || a.label.localeCompare(b.label));
+  }
+
+  // Default panel: the virtue with the most writeups, else the most picked.
+  function defaultVirtue(virtues, agg) {
+    const written = id => agg.byVirtue[id].excess.length + agg.byVirtue[id].missing.length;
+    return [...virtues].sort((a, b) => written(b.id) - written(a.id) || agg.counts[b.id] - agg.counts[a.id])[0].id;
+  }
+
   function create(root, { virtues, instructor = false }) {
     const byId = Object.fromEntries(virtues.map(v => [v.id, v]));
     const state = { agg: null, mine: new Set(), showNames: false, active: null };
+    const stacked = window.matchMedia('(max-width: 719px)');
 
-    const barsBox = el('div', { class: 'bars' });
     const graphBox = el('div', { class: 'graph' });
     const writeBox = el('div', { class: 'card writeups' });
     root.append(
       el('div', { class: 'results' },
-        el('div', { class: 'card' }, el('h2', {}, 'How often each virtue was picked'), barsBox),
         el('div', { class: 'card' },
           el('div', { class: 'row' },
-            el('h2', {}, 'Picked together'),
+            el('h2', {}, 'Virtues chosen'),
             el('span', { class: 'spacer' }),
             el('button', { class: 'link small', onclick: () => graph.shake() }, 'Shake')),
-          el('p', { class: 'small muted' }, 'Lines join virtues chosen together more often than chance. Thicker = stronger. Drag a virtue to see what comes with it.'),
+          el('p', { class: 'small muted' },
+            'Size = how many picked it. Lines join virtues picked together more often than chance. Tap a virtue to read its failure modes; drag to explore.'),
           graphBox),
         writeBox));
 
-    const graph = forceGraph(graphBox, virtues, { onTap: id => select(id) });
+    const graph = forceGraph(graphBox, virtues, { onTap: id => select(id, true) });
 
-    function select(id) {
-      state.active = state.active === id ? null : id;
+    function select(id, fromGraph = false) {
+      state.active = id;
       render();
+      if (fromGraph && stacked.matches) writeBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function renderBars() {
-      const { n, counts } = state.agg;
-      const sorted = [...virtues].sort((a, b) => counts[b.id] - counts[a.id] || a.label.localeCompare(b.label));
-      barsBox.replaceChildren(...sorted.map(v => {
-        const c = counts[v.id], pct = n ? Math.round((100 * c) / n) : 0;
-        return el('button', { class: 'bar' + (state.active === v.id ? ' active' : ''), onclick: () => select(v.id), title: v.def },
-          el('span', { class: 'lbl' + (state.mine.has(v.id) ? ' mine' : '') }, v.label),
-          el('span', { class: 'track' }, el('span', { class: 'fill', style: `width:${pct}%` })),
-          el('span', { class: 'num' }, `${c} · ${pct}%`));
-      }));
-    }
-
-    function renderGraph() {
-      graph.update(state.agg, { mine: state.mine, active: state.active });
+    function step(delta) {
+      const order = ordered(virtues, state.agg.counts);
+      const i = order.findIndex(v => v.id === state.active);
+      select(order[(i + delta + order.length) % order.length].id);
     }
 
     function entryList(entries, cls) {
       if (!entries.length) return el('p', { class: 'none' }, 'Nothing written yet.');
       return el('ul', { class: cls }, entries.map(e => el('li', {},
         instructor && state.showNames && e.author ? el('div', { class: 'author' }, e.author) : null,
-        e.failure ? el('pre', {}, e.failure) : null,
+        e.failure ? el('pre', { class: 'fm' }, e.failure) : null,
         e.workaround ? el('pre', { class: 'wa' }, e.workaround) : null)));
     }
 
     function renderWriteups() {
-      if (!state.active) {
-        writeBox.replaceChildren(el('p', { class: 'muted' }, 'Tap any virtue above to read the failure modes people wrote for it.'));
-        return;
-      }
+      const { n, counts, byVirtue } = state.agg;
       const v = byId[state.active];
-      const w = state.agg.byVirtue[v.id];
+      const w = byVirtue[v.id];
+      const order = ordered(virtues, counts);
+      const pos = order.findIndex(x => x.id === v.id) + 1;
       writeBox.replaceChildren(
-        el('div', { class: 'row' },
-          el('h2', {}, v.label),
-          el('span', { class: 'spacer' }),
-          el('button', { class: 'link', onclick: () => select(null) }, 'Close')),
-        el('p', { class: 'small muted' }, v.def),
-        el('div', { class: 'cols' },
-          el('div', {},
-            el('h3', {}, el('span', { class: 'mode-tag excess' }, 'INCLUDED'), ` Failure in excess (${w.excess.length})`),
-            entryList(w.excess, 'excess')),
-          el('div', {},
-            el('h3', {}, el('span', { class: 'mode-tag missing' }, 'EXCLUDED'), ` Failure when missing (${w.missing.length})`),
-            entryList(w.missing, 'missing'))));
+        el('div', { class: 'row panel-head' },
+          el('button', { class: 'nav', 'aria-label': 'Previous virtue', onclick: () => step(-1) }, '‹'),
+          el('div', { class: 'panel-title' },
+            el('h2', {}, v.label),
+            el('div', { class: 'small muted' },
+              `Picked by ${counts[v.id]} of ${n} · ${pos} of ${order.length}`,
+              state.mine.has(v.id) ? el('span', { class: 'mine-tag' }, '★ in your design') : null)),
+          el('button', { class: 'nav', 'aria-label': 'Next virtue', onclick: () => step(1) }, '›')),
+        el('p', { class: 'small muted def' }, v.def),
+        el('section', {},
+          el('h3', {}, el('span', { class: 'mode-tag excess' }, 'INCLUDED'), ` Fails when there's too much (${w.excess.length})`),
+          entryList(w.excess, 'excess')),
+        el('section', {},
+          el('h3', {}, el('span', { class: 'mode-tag missing' }, 'EXCLUDED'), ` Fails when it's missing (${w.missing.length})`),
+          entryList(w.missing, 'missing')));
     }
 
     function render() {
       if (!state.agg) return;
-      renderBars();
-      renderGraph();
+      if (!state.active) state.active = defaultVirtue(virtues, state.agg);
+      graph.update(state.agg, { mine: state.mine, active: state.active });
       renderWriteups();
     }
 
