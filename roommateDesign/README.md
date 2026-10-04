@@ -44,7 +44,7 @@ The generator lives in `public/test/fake-class.js`, shared by the page and `scri
 ## Check which version is deployed
 
 `https://<app>.up.railway.app/version` returns the running commit, for example `{"commit":"3df4b56",...}`.
-Compare it with `git log -1 --format=%h` after a push.
+Compare it with `git log -1 --format=%h` after a push. A push to `main` that changes anything under `roommateDesign/` should redeploy automatically within a few minutes.
 
 ## Deploy on Railway
 
