@@ -71,10 +71,10 @@ Students can open it after submitting, or once submissions are closed. The instr
 
 ```
 ┌ Virtues chosen ───────────────┐ ┌ ‹      Empathy          › ┐
-│   (graph: size = # picked,    │ │ Picked by 13 of 25 · 1/12  │
-│    lines = picked together)   │ │ INCLUDED  Too much (4)     │
+│   (graph: size = # picked,    │ │ Picked 13 of 25 · Ranked 1 │
+│    lines = picked together)   │ │ …with excessive empathy    │
 │   tap a virtue → panel        │ │   failure… ↳ workaround…   │
-│                               │ │ EXCLUDED  Missing (3)      │
+│                               │ │ …with absence of empathy   │
 └───────────────────────────────┘ └────────────────────────────┘
 ```
 
@@ -88,8 +88,8 @@ Wide screens show two columns: the graph on the left and the writeup panel on th
    - The graph appears once there are at least 5 submissions. The panel works before that.
 2. **Writeup panel (right), the main content.**
    - It opens on the virtue with the most writeups. **‹ ›** step through virtues in order of popularity, for walking the class through them one by one.
-   - The header shows "Picked by k of n", the position in that order, and, for students, "★ in your design".
-   - Two sections: **Included: fails when there's too much (k)** and **Excluded: fails when it's missing (k)**. Each failure mode has its workaround indented beneath it.
+   - The header shows "Picked by k of n · Ranked r of 12" and, for students, "★ in your design".
+   - Two sections: **Failure modes with excessive ⟨virtue⟩** and **Failure modes with absence of ⟨virtue⟩**. The virtue name is lowercased mid-sentence. Each failure mode has its workaround indented beneath it.
    - Instructor view: a **Show names** toggle, off by default, attributes each entry to its author's nickname or name. Students always see anonymous entries.
 
 There is no separate frequency chart: counts are in the graph labels and the panel header.

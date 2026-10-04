@@ -262,21 +262,22 @@
       const w = byVirtue[v.id];
       const order = ordered(virtues, counts);
       const pos = order.findIndex(x => x.id === v.id) + 1;
+      const name = v.label.toLowerCase(); // reads naturally mid-sentence
       writeBox.replaceChildren(
         el('div', { class: 'row panel-head' },
           el('button', { class: 'nav', 'aria-label': 'Previous virtue', onclick: () => step(-1) }, '‹'),
           el('div', { class: 'panel-title' },
             el('h2', {}, v.label),
             el('div', { class: 'small muted' },
-              `Picked by ${counts[v.id]} of ${n} · ${pos} of ${order.length}`,
+              `Picked by ${counts[v.id]} of ${n} · Ranked ${pos} of ${order.length}`,
               state.mine.has(v.id) ? el('span', { class: 'mine-tag' }, '★ in your design') : null)),
           el('button', { class: 'nav', 'aria-label': 'Next virtue', onclick: () => step(1) }, '›')),
         el('p', { class: 'small muted def' }, v.def),
         el('section', {},
-          el('h3', {}, el('span', { class: 'mode-tag excess' }, 'INCLUDED'), ` Fails when there's too much (${w.excess.length})`),
+          el('h3', {}, `Failure modes with excessive ${name}`),
           entryList(w.excess, 'excess')),
         el('section', {},
-          el('h3', {}, el('span', { class: 'mode-tag missing' }, 'EXCLUDED'), ` Fails when it's missing (${w.missing.length})`),
+          el('h3', {}, `Failure modes with absence of ${name}`),
           entryList(w.missing, 'missing')));
     }
 
