@@ -163,7 +163,8 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 .graph .node.zero .dot { fill: var(--surface); stroke-dasharray: 3 3; stroke: var(--muted); }
 .graph .node.active .dot { stroke-width: 4; stroke: var(--ink); }
 .graph .node.active text { font-weight: 700; }
-.graph .node text { font-size: 11px; fill: var(--ink); text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.graph .node text { font-size: 11px; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.graph .node .count { font-size: 8px; font-weight: 700; text-anchor: middle; dominant-baseline: central; stroke-width: 2px; }
 .graph .waiting { padding: 2em 1em; text-align: center; color: var(--muted); }
 
 .writeups .panel-head { flex-wrap: nowrap; align-items: flex-start; }

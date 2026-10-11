@@ -46,16 +46,20 @@
     const nodes = virtues.map((v, i) => {
       const a = (2 * Math.PI * i) / virtues.length;
       const lines = wrapLabel(v.label);
+      // dy offsets vertically center the (one- or two-line) label block on the
+      // node's own y, since labels now sit beside nodes, not below them.
+      const dys = lines.length === 1 ? [4] : [-2, 12];
       const n = {
         id: v.id, x: cx + 120 * Math.cos(a), y: cy + 110 * Math.sin(a), vx: 0, vy: 0, r: 8,
         fx: null, fy: null, lines,
         title: el('title', {}),
         hit: el('circle', { class: 'hit' }), // larger invisible tap target
         circle: el('circle', { class: 'dot' }),
-        spans: lines.map((t, k) => el('tspan', { dy: k ? 12 : 0 }, t)),
+        count: el('text', { class: 'count' }),
+        spans: lines.map((t, k) => el('tspan', { dy: dys[k] }, t)),
       };
       n.text = el('text', {}, ...n.spans);
-      n.g = el('g', { class: 'node' }, n.title, n.hit, n.circle, n.text);
+      n.g = el('g', { class: 'node' }, n.title, n.hit, n.circle, n.count, n.text);
       nodeLayer.append(n.g);
       attachDrag(n);
       return n;
@@ -104,7 +108,7 @@
           const a = nodes[i], b = nodes[j];
           const x = a.x - b.x, y = a.y - b.y;
           const d2 = Math.max(x * x + y * y, 1), d = Math.sqrt(d2);
-          const f = (2500 / d2) * alpha;
+          const f = (4000 / d2) * alpha;
           a.vx += (x / d) * f; a.vy += (y / d) * f;
           b.vx -= (x / d) * f; b.vy -= (y / d) * f;
         }
@@ -114,7 +118,7 @@
         const x = b.x - a.x, y = b.y - a.y, d = Math.max(Math.hypot(x, y), 1);
         // Pull grows with the square of how far above chance the pair is,
         // so weak links barely tug and strong ones form visible clusters.
-        const target = 40;
+        const target = 55;
         const f = 0.2 * (d - target) * Math.min(e.lift - 1, 2) ** 2 * alpha;
         a.vx += (x / d) * f; a.vy += (y / d) * f;
         b.vx -= (x / d) * f; b.vy -= (y / d) * f;
@@ -128,8 +132,10 @@
         n.vy = (n.vy + 0.03 * (cy - n.y) * alpha) * 0.6;
         const sp = Math.hypot(n.vx, n.vy);
         if (sp > 15) { n.vx *= 15 / sp; n.vy *= 15 / sp; }
-        n.x = Math.min(W - 45, Math.max(45, n.x + n.vx));
-        n.y = Math.min(H - 30, Math.max(22, n.y + n.vy));
+        // Wide horizontal margin: labels now sit beside nodes near the edges,
+        // not below them, so they need side room rather than headroom.
+        n.x = Math.min(W - 90, Math.max(90, n.x + n.vx));
+        n.y = Math.min(H - 20, Math.max(16, n.y + n.vy));
       }
     }
 
@@ -141,8 +147,17 @@
         n.hit.setAttribute('cx', n.x);
         n.hit.setAttribute('cy', n.y);
         n.hit.setAttribute('r', Math.max(n.r + 4, 16));
-        n.text.setAttribute('y', n.y + n.r + 12);
-        for (const t of n.spans) t.setAttribute('x', n.x);
+        n.count.setAttribute('x', n.x);
+        n.count.setAttribute('y', n.y);
+        // Label sits beside the node, on the side away from the canvas
+        // center, rather than always below it - the main source of
+        // label/node overlap when nodes end up close together vertically.
+        const onRight = n.x >= cx;
+        const tx = n.x + (onRight ? 1 : -1) * (n.r + 6);
+        n.text.setAttribute('x', tx);
+        n.text.setAttribute('y', n.y);
+        n.text.setAttribute('text-anchor', onRight ? 'start' : 'end');
+        for (const t of n.spans) t.setAttribute('x', tx);
       }
       for (const e of edges) {
         const a = byId[e.a], b = byId[e.b];
@@ -178,7 +193,7 @@
         for (const nd of nodes) {
           nd.r = 5 + 9 * Math.sqrt(counts[nd.id] / maxCount);
           nd.title.textContent = `${v[nd.id].label}: ${counts[nd.id]}`;
-          nd.spans[nd.spans.length - 1].textContent = `${nd.lines[nd.lines.length - 1]} · ${counts[nd.id]}`;
+          nd.count.textContent = counts[nd.id];
           nd.g.setAttribute('class', ['node', mine.has(nd.id) && 'mine', counts[nd.id] === 0 && 'zero', active === nd.id && 'active']
             .filter(Boolean).join(' '));
         }

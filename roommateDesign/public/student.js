@@ -193,9 +193,13 @@
     $('dlgTag').textContent = mode === 'excess' ? 'SELECTED' : 'NOT SELECTED';
     $('dlgTitle').textContent = v.label;
     $('dlgDef').textContent = v.def;
+    const name = v.label.toLowerCase(); // reads naturally mid-sentence
     $('dlgPrompt').textContent = mode === 'excess'
-      ? 'How could this fail if expressed in excess?'
-      : 'How could this fail because it is missing?';
+      ? `Failure mode with too much ${name}`
+      : `Failure mode for agents lacking ${name}`;
+    $('dlgWorkPrompt').textContent = mode === 'excess'
+      ? 'Practical wisdom needed'
+      : 'Institutional safeguard needed';
     $('dlgFailure').value = n.failure;
     $('dlgWork').value = n.workaround;
     for (const t of ['dlgFailure', 'dlgWork']) $(t).readOnly = closed;
