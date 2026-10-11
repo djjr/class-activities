@@ -20,10 +20,15 @@
         if (!list.length) { box.innerHTML = '<p class="muted">No saved sessions yet.</p>'; return; }
         box.replaceChildren(...list.map(s => {
           const row = document.createElement('p');
-          const a = document.createElement('a');
-          a.href = `/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}`;
-          a.textContent = `${new Date(s.createdAt).toLocaleString()} — ${s.code}`;
-          row.append(a, ` · ${s.nSubmitted} submitted · saved ${new Date(s.savedAt).toLocaleString()}`);
+          const label = document.createElement('span');
+          label.textContent = `${new Date(s.createdAt).toLocaleString()} — ${s.code}`;
+          const view = document.createElement('a');
+          view.href = `/i/view?id=${encodeURIComponent(s.id)}&key=${encodeURIComponent(KEY)}`;
+          view.textContent = 'View';
+          const download = document.createElement('a');
+          download.href = `/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}`;
+          download.textContent = 'Download';
+          row.append(label, ' · ', view, ' · ', download, ` · ${s.nSubmitted} submitted · saved ${new Date(s.savedAt).toLocaleString()}`);
           return row;
         }));
       } catch (e) {

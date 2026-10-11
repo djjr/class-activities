@@ -16,11 +16,11 @@ Read these first:
 - `roommateDesign/README.md`: run locally, fake data, Railway, slides.com embed
 
 Code map:
-- `sim.js`: virtue list + definitions, budget, `validate` / `aggregate` / `snapshot`. All activity-specific logic lives here.
-- `server.js`: Express. One session in memory, SSE live updates, `live.json` backup, saves to `DATA_DIR/saved/`.
+- `sim.js`: virtue list + definitions, budget, `validate` / `aggregate` / `snapshot`. `toAggregate(snapshotData)` rebuilds the `{n, counts, pairs, byVirtue}` shape from a saved snapshot's `selections` (pairs/lift aren't stored on disk, just derived on read) so saved-view.html can reuse `results.js` unchanged. All activity-specific logic lives here.
+- `server.js`: Express. One session in memory, SSE live updates, `live.json` backup, saves to `DATA_DIR/saved/`. `/version` reports `dataDir`, `railwayVolumeMountPath`, and `savedSessionCount` for diagnosing the persistence issue below.
 - `public/student.*`: join → design board (tap pill to move; ✎ opens failure-mode dialog) → submit → results.
-- `public/results.js`: shared results view. Springy draggable co-selection graph on the left (hand-rolled force layout, no d3); writeup panel on the right with ‹ › stepping.
-- `public/welcome.html`, `aggregate.html`, `sessions.html` + `instructor.js`: instructor pages; the key comes from `?key=`.
+- `public/results.js`: shared results view, used by both the live `aggregate.html` and the read-only `saved-view.html`. Springy draggable co-selection graph on the left (hand-rolled force layout, no d3); writeup panel on the right with ‹ › stepping.
+- `public/welcome.html`, `aggregate.html`, `sessions.html`, `saved-view.html` + `instructor.js`: instructor pages; the key comes from `?key=`. `sessions.html` links to `saved-view.html` (`/i/view?id=...`) to view a saved session read-only, and to `/api/i/saved/:id` to download its raw JSON.
 - `public/test/fake-class.{html,js}`: fake-class generator, shared with `scripts/fake-class.js`.
 
 ## Conventions and decisions (settled; don't relitigate)
@@ -66,11 +66,11 @@ Visual checks need the Claude in Chrome extension, which was not connected in th
 ## Open items
 
 - Optional: serve pages without the `.html` ending (`express.static(..., { extensions: ['html'] })`), so `/test/fake-class` works.
-- **Saved sessions don't survive a redeploy** (low priority; parked by Dan, 2026-10-04).
+- **Saved sessions don't survive a redeploy** (low priority; parked by Dan, 2026-10-04). `DATA_DIR=/data` is confirmed set (2026-10-11), so the remaining question is whether a real persistent Volume is attached to this service at that exact path.
   - Repro: save a few sessions, Redeploy in Railway, `/i/sessions` is empty.
-  - Conflicting evidence: Railway's assistant says a volume is attached at `/data` and that it can see `live.json` on it. But the Variables tab lists no `RAILWAY_VOLUME_*` variables, and `DATA_DIR` was not confirmed set.
-  - First step: make `/version` report the resolved `DATA_DIR`, `RAILWAY_VOLUME_MOUNT_PATH`, and the files in `saved/`. Then fall back to `RAILWAY_VOLUME_MOUNT_PATH` when `DATA_DIR` is unset.
+  - Conflicting evidence: Railway's assistant says a volume is attached at `/data` and that it can see `live.json` on it. But the Variables tab lists no `RAILWAY_VOLUME_*` variables.
+  - `/version` now reports `dataDir`, `railwayVolumeMountPath`, and `savedSessionCount` (added 2026-10-11, not yet deployed/verified on Railway). Next step: hit `/version` before and after a redeploy and compare `savedSessionCount`, and check whether `railwayVolumeMountPath` is `/data` or `null`. If it's `null`, no volume is attached to this service and that's the root cause — ask Railway's assistant to attach a Volume to this specific service mounted at `/data`, and to confirm it's the same volume (not a new one) after the next redeploy.
   - Workaround in use: download each save's JSON from `/i/sessions` right after saving. Dan verified the downloaded JSON looks right.
   - Also implies the mid-class `live.json` backup may not survive a redeploy, so don't push to `main` during class.
-- Not yet done: a visual pass of the student page at phone width, and of the results slide inside an actual slides.com iframe.
+- Not yet done: a visual pass of the student page at phone width, and of the results slide inside an actual slides.com iframe. Also not yet visually verified: `saved-view.html` (added 2026-10-11) — the server-side `toAggregate` math is checked against `aggregate()` on synthetic data and the endpoint returns well-formed data for the one real saved session, but no one has looked at the rendered page in a browser yet.
 - Future activities go in sibling folders. Generalize shared pieces (session/QR/SSE) only when a second activity actually needs them.

@@ -169,13 +169,25 @@ app.get('/s/:code', page('student.html'));
 app.get('/i/welcome', page('welcome.html'));
 app.get('/i/aggregate', page('aggregate.html'));
 app.get('/i/sessions', page('sessions.html'));
+app.get('/i/view', page('saved-view.html'));
 app.get('/healthz', (req, res) => res.send('ok'));
 // Which commit is running (Railway sets RAILWAY_GIT_COMMIT_SHA on GitHub deploys).
 const STARTED_AT = new Date().toISOString();
-app.get('/version', (req, res) => res.json({
-  commit: (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7),
-  startedAt: STARTED_AT,
-}));
+app.get('/version', (req, res) => {
+  let savedCount = null;
+  try {
+    savedCount = fs.readdirSync(SAVED_DIR).filter(f => f.endsWith('.json')).length;
+  } catch {
+    savedCount = 'error reading SAVED_DIR';
+  }
+  res.json({
+    commit: (process.env.RAILWAY_GIT_COMMIT_SHA || 'local').slice(0, 7),
+    startedAt: STARTED_AT,
+    dataDir: DATA_DIR,
+    railwayVolumeMountPath: process.env.RAILWAY_VOLUME_MOUNT_PATH || null,
+    savedSessionCount: savedCount,
+  });
+});
 
 function baseUrl(req) {
   return PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
@@ -251,6 +263,21 @@ app.get('/api/i/saved/:id', (req, res) => {
   const file = path.join(SAVED_DIR, req.params.id);
   if (!fs.existsSync(file)) return res.status(404).end();
   res.download(file);
+});
+
+// Same payload shape as the live stream, so saved-view.html can reuse results.js unchanged.
+app.get('/api/i/saved/:id/aggregate', (req, res) => {
+  if (!/^[\w-]+\.json$/.test(req.params.id)) return res.status(400).end();
+  const file = path.join(SAVED_DIR, req.params.id);
+  if (!fs.existsSync(file)) return res.status(404).end();
+  const record = JSON.parse(fs.readFileSync(file, 'utf8'));
+  res.json({
+    session: { code: record.code, closed: record.closed, createdAt: record.createdAt },
+    savedAt: record.savedAt,
+    counts: { joined: record.nJoined, submitted: record.nSubmitted },
+    virtues: record.data.virtues,
+    aggregate: sim.toAggregate(record.data),
+  });
 });
 
 app.get('/api/i/stream', (req, res) => {

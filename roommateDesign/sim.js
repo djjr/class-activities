@@ -111,4 +111,26 @@ function snapshot(submissions) {
   };
 }
 
-module.exports = { VIRTUES, BUDGET, MAX_TEXT, validate, aggregate, snapshot };
+// Rebuilds the {n, counts, pairs, byVirtue} shape aggregate() produces, from a
+// saved snapshot's `selections` (pairs/lift aren't stored on disk, just derived
+// here on read, so this works for every snapshot ever saved).
+function toAggregate({ selections, counts, byVirtue }) {
+  const n = selections.length;
+  const pairCounts = {};
+  for (const sel of selections) {
+    const s = [...sel].sort();
+    for (let i = 0; i < s.length; i++) {
+      for (let j = i + 1; j < s.length; j++) {
+        const key = s[i] + '|' + s[j];
+        pairCounts[key] = (pairCounts[key] || 0) + 1;
+      }
+    }
+  }
+  const pairs = Object.entries(pairCounts).map(([key, count]) => {
+    const [a, b] = key.split('|');
+    return { a, b, count, lift: (n * count) / (counts[a] * counts[b]) };
+  });
+  return { n, counts, pairs, byVirtue };
+}
+
+module.exports = { VIRTUES, BUDGET, MAX_TEXT, validate, aggregate, snapshot, toAggregate };

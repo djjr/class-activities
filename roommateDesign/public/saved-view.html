@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Robot Roommate — Saved session</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="slide">
+    <div class="ctrl">
+      <h1 style="margin:0">Our robot roommates</h1>
+      <span class="spacer"></span>
+      <span id="count" class="count"></span>
+      <a href="/i/sessions" id="backLink">&larr; Saved sessions</a>
+    </div>
+    <div id="root"></div>
+  </main>
+
+  <script src="/results.js"></script>
+  <script src="/instructor.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const id = new URLSearchParams(location.search).get('id') || '';
+    $('backLink').href = `/i/sessions?key=${encodeURIComponent(KEY)}`;
+
+    async function start() {
+      let msg;
+      try {
+        msg = await iapi(`saved/${encodeURIComponent(id)}/aggregate`);
+      } catch (e) {
+        $('root').textContent = e.message;
+        return;
+      }
+      $('count').textContent = `${msg.session.code} · ${msg.counts.submitted} submitted · saved ${new Date(msg.savedAt).toLocaleString()}`;
+      const results = Results.create($('root'), { virtues: msg.virtues, instructor: true });
+      results.update(msg.aggregate, { showNames: false });
+    }
+
+    start();
+  </script>
+</body>
+</html>
