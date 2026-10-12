@@ -39,9 +39,9 @@ Students design a robot roommate by choosing virtues within a budget. They then 
 - **On narrow screens**, the columns stack, with Selected on top. On wide screens they sit side by side, Selected on the left.
 - **The ✎ button on each pill opens the failure-mode dialog.** A dot (•) means the pill already has text.
 - **The dialog** depends on the pill's current column:
-  - Selected → "How could this fail if expressed **in excess**?"
-  - Not selected → "How could this fail because it is **missing**?"
-  - Each dialog has two free-text boxes, **Failure mode** and **Workarounds**. Students can write as much as they like, including several items.
+  - Selected → **"Failure mode with too much ⟨virtue⟩"** and **"Practical wisdom needed"**.
+  - Not selected → **"Failure mode for agents lacking ⟨virtue⟩"** and **"Institutional safeguard needed"**.
+  - Each dialog has these two free-text boxes. Students can write as much as they like, including several items. (In the data, the second box is still stored as `workaround`.)
 - **Everything is optional.** A student can submit an empty or partial design.
 - **If a student moves a pill after writing about it,** the text for the other column is kept but not submitted. It reappears if they move the pill back.
 - **The draft autosaves** to `localStorage`, so a refresh loses nothing. **Submit** sends the current state and can be pressed again until submissions close.
@@ -72,9 +72,9 @@ Students can open it after submitting, or once submissions are closed. The instr
 ```
 ┌ Virtues chosen ───────────────┐ ┌ ‹      Empathy          › ┐
 │   (graph: size = # picked,    │ │ Picked 13 of 25 · Ranked 1 │
-│    lines = picked together)   │ │ …with excessive empathy    │
+│    lines = picked together)   │ │ …with too much empathy     │
 │   tap a virtue → panel        │ │   failure… ↳ workaround…   │
-│                               │ │ …with absence of empathy   │
+│                               │ │ …for agents lacking empathy│
 └───────────────────────────────┘ └────────────────────────────┘
 ```
 
@@ -89,7 +89,7 @@ Wide screens show two columns: the graph on the left and the writeup panel on th
 2. **Writeup panel (right), the main content.**
    - It opens on the virtue with the most writeups. **‹ ›** step through virtues in order of popularity, for walking the class through them one by one.
    - The header shows "Picked by k of n · Ranked r of 12" and, for students, "★ in your design".
-   - Two sections: **Failure modes with excessive ⟨virtue⟩** and **Failure modes with absence of ⟨virtue⟩**. The virtue name is lowercased mid-sentence. Each failure mode has its workaround indented beneath it.
+   - Two sections: **Failure modes with too much ⟨virtue⟩** and **Failure modes for agents lacking ⟨virtue⟩**, matching the dialog wording. The virtue name is lowercased mid-sentence. Each failure mode has its second-box text indented beneath it, labelled "↳ Practical wisdom needed:" (too much) or "↳ Institutional safeguard needed:" (lacking).
    - Instructor view: a **Show names** toggle, off by default, attributes each entry to its author's nickname or name. Students always see anonymous entries.
 
 There is no separate frequency chart: counts are in the graph labels and the panel header.

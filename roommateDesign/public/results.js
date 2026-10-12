@@ -289,10 +289,10 @@
           el('button', { class: 'nav', 'aria-label': 'Next virtue', onclick: () => step(1) }, '›')),
         el('p', { class: 'small muted def' }, v.def),
         el('section', {},
-          el('h3', {}, `Failure modes with excessive ${name}`),
+          el('h3', {}, `Failure modes with too much ${name}`),
           entryList(w.excess, 'excess')),
         el('section', {},
-          el('h3', {}, `Failure modes with absence of ${name}`),
+          el('h3', {}, `Failure modes for agents lacking ${name}`),
           entryList(w.missing, 'missing')));
     }
 

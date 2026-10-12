@@ -180,7 +180,9 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 .writeups pre { white-space: pre-wrap; font: inherit; margin: 0; }
 .writeups .fm { font-size: 1.02rem; }
 .writeups .wa { color: var(--muted); font-size: .9rem; margin: .3em 0 0 1em; }
-.writeups .wa::before { content: "↳ Workaround: "; font-weight: 600; }
+.writeups .wa::before { font-weight: 600; }
+.writeups .excess .wa::before { content: "↳ Practical wisdom needed: "; }
+.writeups .missing .wa::before { content: "↳ Institutional safeguard needed: "; }
 .writeups .author { font-size: .8rem; font-weight: 700; color: var(--muted); }
 .writeups .none { color: var(--muted); font-style: italic; }
 
