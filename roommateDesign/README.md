@@ -1,6 +1,6 @@
 # Roommate Design
 
-Classroom activity: students design a robot roommate by choosing up to 5 virtues, then describe failure modes and workarounds. Results show live on slides.com through iframes.
+Classroom activity: students design a robot roommate by choosing up to 5 virtues, then describe failure modes and the practical wisdom or institutional safeguards they call for. Results show live on slides.com through iframes.
 
 - Design: [ARCHITECTURE.md](ARCHITECTURE.md), [SIMULATION.md](SIMULATION.md)
 - Virtue list, definitions, budget: [sim.js](sim.js)
