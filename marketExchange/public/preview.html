@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chair card preview</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Design preview of the chair card with random data. No server needed:
+       open it on a phone, hold it up, and check it reads from across a room. -->
+  <div class="phone">
+    <div id="card"></div>
+    <div class="row">
+      <button class="btn secondary" id="next">New chair</button>
+      <button class="btn" disabled>Trade</button>
+    </div>
+  </div>
+  <script src="../sim.js"></script>
+  <script src="card.js"></script>
+  <script>
+    const NAMES = ['Maya', 'Jordan', 'Priya', 'Sam', 'Diego', 'Lin', 'Ava', 'Kofi', 'Noor', 'Eli'];
+    const rand = MarketSim.makeRng(Number(new URLSearchParams(location.search).get('seed')) || Date.now());
+    function draw() {
+      const e = MarketSim.newEconomy('chairs', 2, rand);
+      renderChairCard(document.getElementById('card'), {
+        dims: MarketSim.DIMS,
+        chair: e.chairs[0],
+        target: e.targets[0],
+        score: MarketSim.chairScore(e, 0, 0),
+        nickname: NAMES[Math.floor(rand() * NAMES.length)],
+      });
+    }
+    document.getElementById('next').onclick = draw;
+    draw();
+  </script>
+</body>
+</html>
