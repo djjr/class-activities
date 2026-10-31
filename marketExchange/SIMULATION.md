@@ -101,6 +101,18 @@ The instructor tells students to move around as much or as little as they like.
 
 ### Finding a partner
 
+The flow in an ordinary round:
+
+1. Look around. Everyone holds up their chair card. You spot a card whose bars look close to your "You want" strip.
+2. Optionally talk to them. The app doesn't require it.
+3. Tap **Trade**, then tap their nickname (shown large on their card, so you know which name to tap).
+4. Your phone shows **your own** result ("Maya's chair: 41 → 52") and an **Offer swap** button.
+5. They get a banner with **their own** result and **Accept / Decline**.
+6. On Accept, both cards update, and the trade appears on the projector's ticker.
+
+Round types differ in how hard it is to **find** a trade (step 1), not how hard it is to evaluate one (step 4 is always available). Score previews are **uncapped**: a student can tap through every name to build their own classifieds list. That is tedious, and the tedium is the friction we want. If students routinely do it, a per-round preview cap is the lever. Decided 2026-10-31: start uncapped.
+
+
 - **Ordinary round:** tap **Trade**, then tap the name of the person you're talking to (a list of joined nicknames). You see only **your own** result: "Your score: 41 → 52."
 - **Classifieds round:** **Trade** opens a sorted list: "Chairs that would raise your score" with your gain and the holder's name. You can send an offer straight from the list. You still see only your own gain.
 - **Offices phases:** the Trade screen is a **map** of the grid. Each office shows its occupant's type as a color, yours is outlined, and phantoms are grey. Tap any office to see your score change if you swapped with its occupant. In a Classifieds round, a sorted list appears beside the map.

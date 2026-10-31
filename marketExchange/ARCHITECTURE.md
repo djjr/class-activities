@@ -115,3 +115,4 @@ Still no test suite, matching repo practice, but:
 4. Students move around as much or as little as they like. The phone is a chair card meant to be held up.
 5. A fresh economy is generated at each phase start for whoever is present. Phantoms fill office grids, never trade, and are not counted in welfare.
 6. Folder name: `marketExchange`.
+7. Score previews (`/preview`) are uncapped in every round type. The student's "You want" target is fixed for the whole phase; only holdings change.
