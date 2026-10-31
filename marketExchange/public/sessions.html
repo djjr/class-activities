@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange — Saved sessions</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="narrow" style="max-width:720px">
+    <h1>Saved sessions</h1>
+    <p class="muted">Anonymized: economies, trades, and welfare by round. No names.</p>
+    <div id="list"></div>
+  </main>
+  <script src="/instructor.js"></script>
+  <script>
+    const LABEL = { chairs: 'Chairs', 'offices-random': 'Offices: random', 'offices-like-me': 'Offices: like me' };
+    iapi('saved').then(list => {
+      document.getElementById('list').innerHTML = list.length ? list.map(s => `
+        <div class="panel saved-row">
+          <div><b>${esc(s.code)}</b> · ${new Date(s.createdAt).toLocaleString()}<br>
+          <span class="muted">${s.nJoined} joined · ${s.phases.map(t => LABEL[t] || t).join(', ') || 'no phases'}</span></div>
+          <a class="btn secondary" href="/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}">JSON</a>
+        </div>`).join('') : '<p class="muted">Nothing saved yet.</p>';
+    }).catch(e => { document.getElementById('list').textContent = e.message; });
+  </script>
+</body>
+</html>

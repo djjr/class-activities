@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange — Room</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="slide">
+  <div class="room">
+    <header class="room-head">
+      <div>
+        <div class="room-phase" id="phaseLabel">No phase yet</div>
+        <div class="muted" id="roundLabel"></div>
+      </div>
+      <div class="room-counts" id="counts"></div>
+    </header>
+
+    <section class="room-main">
+      <div class="room-left panel">
+        <div class="kpi-row">
+          <div class="kpi"><div class="kpi-num" id="kpiWelfare">–</div><div class="kpi-label">room welfare</div></div>
+          <div class="kpi"><div class="kpi-num" id="kpiShare">–</div><div class="kpi-label" id="kpiShareLabel">of possible gain</div></div>
+          <div class="kpi" id="kpiHarmBox" hidden><div class="kpi-num warn-text" id="kpiHarm">0</div><div class="kpi-label">trades that lowered welfare</div></div>
+          <div class="kpi" id="kpiSortBox" hidden><div class="kpi-num" id="kpiSort">–</div><div class="kpi-label">neighbor difference (lower = more sorted)</div></div>
+        </div>
+        <svg id="chart" class="chart" role="img" aria-label="Room welfare by round"></svg>
+        <div class="history" id="history"></div>
+      </div>
+      <div class="room-right">
+        <div id="mapWrap" class="panel" hidden><div id="map"></div><div class="legend" id="legend"></div></div>
+        <div class="panel ticker-panel">
+          <div class="panel-title">Trades</div>
+          <ol class="ticker" id="ticker"></ol>
+        </div>
+      </div>
+    </section>
+
+    <footer class="controls">
+      <div class="ctl-group">
+        <span class="ctl-label">Start phase</span>
+        <button class="btn small secondary" data-phase="chairs">Chairs</button>
+        <button class="btn small secondary" data-phase="offices-random">Offices: random</button>
+        <button class="btn small secondary" data-phase="offices-like-me">Offices: like me</button>
+      </div>
+      <div class="ctl-group" id="roundCtl">
+        <label class="check"><input type="checkbox" id="optClassifieds"> Classifieds</label>
+        <label class="check"><input type="checkbox" id="optMoney"> Money</label>
+        <button class="btn small" id="openBtn">Open round</button>
+        <button class="btn small warn" id="closeBtn" hidden>Close round</button>
+      </div>
+      <div class="ctl-group">
+        <label class="check"><input type="checkbox" id="optNames"> Show names</label>
+        <button class="btn small secondary" id="saveBtn">Save</button>
+        <span class="muted small" id="msg"></span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/instructor.js"></script>
+  <script src="/offices.js"></script>
+  <script src="/room.js"></script>
+</body>
+</html>

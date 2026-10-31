@@ -1,6 +1,6 @@
 # Market Exchange — Architecture (proof of concept)
 
-**Status: draft for review (2026-10-31). Nothing built yet.**
+**Status: built 2026-10-31, on branch `marketExchange-spec`; not yet deployed.**
 
 The activity itself is specified in [SIMULATION.md](SIMULATION.md) and implemented in `sim.js`. This doc follows the shape of `roommateDesign/ARCHITECTURE.md` and reuses its decisions wherever they apply. The repo-level CLAUDE.md conventions hold: Node + Express, plain HTML/CSS/JS, no build step, dependencies `express` and `qrcode` only, names never written to disk, two-click confirms instead of `alert`/`confirm`, frame-ancestors CSP allowing slides.com, and `INSTRUCTOR_KEY` never committed.
 
@@ -25,8 +25,8 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
                               ▼
                    Node/Express (single instance)
                    ├─ in-memory session
-                   ├─ sim.js: newEconomy(), score(), applyTrade(),
-                   │          classifieds(), benchmark(), snapshot()
+                   ├─ market.js: phases, rounds, offers, views, snapshot
+                   ├─ sim.js: economies, scores, trade effects, benchmarks
                    └─ DATA_DIR (Railway volume)
                         ├─ live.json
                         └─ saved/<timestamp>-<code>.json
@@ -55,7 +55,9 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 | `POST /api/i/round/close` | Close it, withdraw pending offers, record welfare |
 | `POST /api/i/save` · `GET /api/i/saved[/:id]` | Same as roommateDesign |
 | `GET  /api/i/stream` | SSE: room view (welfare series, benchmark, ticker, map, counts) |
+| `GET  /api/i/room` | Same payload as the stream, for scripts that poll (`fake-class --drive`) |
 | `POST /api/s/:code/join` | `{pid, nickname}` |
+| `GET  /api/s/:code/state?pid=` | Same payload as the student stream; the bots poll this |
 | `GET  /api/s/:code/stream?pid=` | SSE: **this student's** view: item, private target, score, tokens, round state, incoming/outgoing offers, partner list or classifieds |
 | `POST /api/s/:code/preview` | `{pid, partner, pay?}` → your score change only |
 | `POST /api/s/:code/offer` | `{pid, partner, pay?}` → creates or replaces your one outgoing offer |
@@ -99,6 +101,25 @@ Still no test suite, matching repo practice, but:
 1. **Bot class** (`public/test/fake-class.html` + `scripts/fake-class.js`): N bots join, and each round they make random offers and accept only if they gain. This replays the Python simulation through the real server, so the welfare curves should land near its numbers (chairs about 80% of possible gain after trading stalls; offices with random preferences showing some red swaps). That is an end-to-end check of the scoring, the offer protocol, and the benchmarks.
 2. **Stale-offer races:** a script fires two acceptances that touch the same chair, and exactly one must succeed.
 3. **Visual:** this session can run headless Chromium, so I can screenshot the student pages at phone width and the room view at slide size. That closes the gap roommateDesign still has. The chair card's readability from a distance still needs Dan's own look on a real phone.
+
+## Code map
+
+- `sim.js`: the economics only (no game state). Scores, economy generation, trade effects, classifieds, benchmarks. Runs in Node and the browser.
+- `market.js`: the game: phases, rounds, offers (with the stale check), per-student and room views, anonymized snapshot. Plain functions over one JSON-serializable `phase` object, so `live.json` restore needs nothing special.
+- `server.js`: routes, SSE, persistence (copied from roommateDesign).
+- `public/student.*`: join → wait → chair card or office map → trade sheet (names / classifieds) → preview → offer; incoming offers float over the card.
+- `public/room.*`: projected view and controls. Hand-rolled SVG chart sized to its box.
+- `public/card.js`, `public/offices.js`: chair card and office map, shared.
+- `public/test/fake-class.*`, `scripts/fake-class.js`: bots (shared logic).
+- `scripts/check-sim.js`, `scripts/check-market.js`: headless checks (`npm run check`).
+
+## Verified so far (2026-10-31)
+
+- `npm run check`: Hungarian = brute force; bot classes match the Python numbers; 12 offer/round/privacy checks.
+- HTTP: two concurrent accepts touching the same chair → exactly one succeeds. Restarting the server mid-round restores the open round and pending offers from `live.json`.
+- `fake-class --drive`: a full three-phase session with 18 bots runs end to end and saves.
+- Headless Chromium screenshots of every student screen (390×844 and 360×640) and the room view at 1280×720. This caught and fixed two bugs: an invisible trade sheet blocking taps, and a distorted chart.
+- Not yet: inside a real slides.com iframe, or on real phones in a room.
 
 ## Railway
 

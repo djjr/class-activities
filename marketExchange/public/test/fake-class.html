@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange — Fake class</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="narrow" style="max-width:560px">
+    <h1>Fake class</h1>
+    <p class="muted">Adds bot students to the <b>current</b> session. They trade by simple rules whenever a round is open. Keep this tab open, and run the session from the room view in another tab.</p>
+    <div class="panel">
+      <label for="n">Number of bots</label>
+      <input id="n" type="text" value="18">
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="fresh"> Start a new session first</label>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="go">Join and start trading</button>
+        <button class="btn secondary" id="stop" disabled>Stop</button>
+      </div>
+      <p><a id="roomLink" target="_blank">Open the room view ↗</a></p>
+    </div>
+    <pre id="log" class="small muted" style="white-space:pre-wrap"></pre>
+  </main>
+  <script src="/instructor.js"></script>
+  <script src="/test/fake-class.js"></script>
+  <script>
+    let bots = null;
+    const log = t => { const el = document.getElementById('log'); el.textContent = t + '\n' + el.textContent.slice(0, 4000); };
+    document.getElementById('roomLink').href = `/i/room?key=${encodeURIComponent(KEY)}`;
+    document.getElementById('go').onclick = async () => {
+      try {
+        if (document.getElementById('fresh').checked) await iapi('new', 'POST');
+        const cur = await iapi('current');
+        bots = FakeClass.createBots({ code: cur.code, n: Number(document.getElementById('n').value) || 18, log });
+        await bots.join();
+        bots.start();
+        document.getElementById('go').disabled = true;
+        document.getElementById('stop').disabled = false;
+        log('Bots are trading whenever a round is open.');
+      } catch (e) { log('Error: ' + e.message); }
+    };
+    document.getElementById('stop').onclick = () => { bots && bots.stop(); log('Stopped.'); document.getElementById('go').disabled = false; document.getElementById('stop').disabled = true; };
+  </script>
+</body>
+</html>

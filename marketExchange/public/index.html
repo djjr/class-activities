@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="narrow">
+    <div class="panel" style="margin-top:10vh">
+      <h1>Market Exchange</h1>
+      <form id="f">
+        <label for="code">Session code</label>
+        <input id="code" type="text" maxlength="4" autocomplete="off" autocapitalize="characters" class="code-input">
+        <button class="btn" style="width:100%;margin-top:12px">Join</button>
+      </form>
+    </div>
+  </main>
+  <script>
+    document.getElementById('f').addEventListener('submit', e => {
+      e.preventDefault();
+      const c = document.getElementById('code').value.trim().toUpperCase();
+      if (c) location.href = '/s/' + encodeURIComponent(c);
+    });
+  </script>
+</body>
+</html>

@@ -23,6 +23,10 @@ Code map:
 - `public/welcome.html`, `aggregate.html`, `sessions.html`, `saved-view.html` + `instructor.js`: instructor pages; the key comes from `?key=`. `sessions.html` links to `saved-view.html` (`/i/view?id=...`) to view a saved session read-only, and to `/api/i/saved/:id` to download its raw JSON.
 - `public/test/fake-class.{html,js}`: fake-class generator, shared with `scripts/fake-class.js`.
 
+### marketExchange: "Market Exchange"
+
+Students trade chairs (pure exchange), then offices (neighbors create externalities: one phase with random preferences, one with "like me"), while the room tracks aggregate welfare per round. Each round, the instructor toggles Classifieds (low search cost) and Money (side payments). Specs and decisions: `marketExchange/SIMULATION.md` and `ARCHITECTURE.md` (includes a code map). `npm run check` runs headless checks; `npm run fake -- --drive` runs a whole bot session. Lives on branch `marketExchange-spec` until Dan approves a merge; needs its own Railway service (root `/marketExchange`) and Watch Paths on both services.
+
 ## Conventions and decisions (settled; don't relitigate)
 
 - Node + Express, plain HTML/CSS/JS, **no build step, no frontend framework**. Two dependencies: `express`, `qrcode`.
