@@ -12,7 +12,7 @@
   <div class="phone">
     <div id="card"></div>
     <div class="row">
-      <button class="btn secondary" id="next">New chair</button>
+      <button class="btn secondary" id="next">Trade for another chair</button>
       <button class="btn" disabled>Trade</button>
     </div>
   </div>
@@ -21,14 +21,17 @@
   <script>
     const NAMES = ['Maya', 'Jordan', 'Priya', 'Sam', 'Diego', 'Lin', 'Ava', 'Kofi', 'Noor', 'Eli'];
     const rand = MarketSim.makeRng(Number(new URLSearchParams(location.search).get('seed')) || Date.now());
+    // One student: name and target are fixed for the phase, as in the real
+    // app. "Trade for another chair" changes only what they hold, which is
+    // all a completed trade changes.
+    const me = MarketSim.newEconomy('chairs', 2, rand);
+    const nickname = NAMES[Math.floor(rand() * NAMES.length)];
     function draw() {
-      const e = MarketSim.newEconomy('chairs', 2, rand);
+      const chair = MarketSim.newEconomy('chairs', 2, rand).chairs[0];
+      const e = { ...me, chairs: [chair] };
       renderChairCard(document.getElementById('card'), {
-        dims: MarketSim.DIMS,
-        chair: e.chairs[0],
-        target: e.targets[0],
-        score: MarketSim.chairScore(e, 0, 0),
-        nickname: NAMES[Math.floor(rand() * NAMES.length)],
+        dims: MarketSim.DIMS, chair, target: me.targets[0],
+        score: MarketSim.chairScore(e, 0, 0), nickname,
       });
     }
     document.getElementById('next').onclick = draw;
