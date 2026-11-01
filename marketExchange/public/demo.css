@@ -150,3 +150,5 @@ body.setup-page { overflow: auto; }
 }
 .tool:hover { opacity: 1; }
 .tool.inline { margin-left: 6px; vertical-align: 1px; opacity: 1; border-color: var(--accent); color: var(--accent); }
+
+.split-opts { margin: 4px 0 4px 26px; display: flex; flex-direction: column; gap: 2px; }

@@ -19,6 +19,7 @@
     phase: { kind: 'enum', values: PHASES.map(p => p[0]), dflt: 'chairs' },
     classifieds: { kind: 'bool', dflt: false },
     money: { kind: 'bool', dflt: false },
+    split: { kind: 'enum', values: ['even', 'winner', 'loser'], dflt: 'even' },
     captions: { kind: 'bool', dflt: true },
     legend: { kind: 'bool', dflt: true },
     speed: { kind: 'num', min: 0.25, max: 10, dflt: 1 },
@@ -97,6 +98,7 @@
     q.set('phase', v.phase);
     if (v.classifieds) q.set('classifieds', '1');
     if (v.money) q.set('money', '1');
+    if (v.money && v.split !== 'even') q.set('split', v.split);
     if (!v.captions) q.set('captions', '0');
     if (!v.legend) q.set('legend', '0');
     if (v.speed !== 1) q.set('speed', String(v.speed));
@@ -127,6 +129,12 @@
           <fieldset><legend>Institutions in this pane</legend>
             <label class="opt"><input type="checkbox" name="classifieds" ${values.classifieds ? 'checked' : ''}> Classifieds</label>
             <label class="opt"><input type="checkbox" name="money" ${values.money ? 'checked' : ''}> Money (side payments)</label>
+            <div class="split-opts" id="splitOpts">
+              <span class="muted small">When a swap helps one side and hurts the other, the winner pays the loser:</span>
+              ${[['even', 'Split evenly: cover the loss, then share the rest'], ['winner', 'Winner keeps most: pay just enough to get a yes'], ['loser', 'Loser gets most: pay nearly the whole gain']]
+                .map(([id, label]) => `<label class="opt"><input type="radio" name="split" value="${id}" ${values.split === id ? 'checked' : ''}> ${label}</label>`).join('')}
+              <span class="muted small">The split changes who gains, not how much the room gains (unless someone runs out of tokens). Compare two money panes with the same seed and different splits.</span>
+            </div>
             <p class="muted small">Neither = plain market. For a side-by-side slide, make a second pane with the same phase and seed and different institutions.</p>
           </fieldset>
           <fieldset class="grid2"><legend>Presentation</legend>
@@ -155,7 +163,7 @@
       const f = new FormData(form), phase = f.get('phase');
       const num = (k, d) => { const x = Number(f.get(k)); return Number.isFinite(x) && x > 0 ? x : d; };
       return {
-        phase, classifieds: f.has('classifieds'), money: f.has('money'), captions: f.has('captions'), legend: f.has('legend'),
+        phase, classifieds: f.has('classifieds'), money: f.has('money'), split: f.get('split') || 'even', captions: f.has('captions'), legend: f.has('legend'),
         speed: num('speed', 1), meetings: Math.min(60, Math.max(4, Math.round(num('meetings', 24)))),
         seed: Math.round(num('seed', DEFAULT_SEED[phase])),
         title: (f.get('title') || '').trim(), group: (f.get('group') || '').trim(),
@@ -169,6 +177,7 @@
         if (v.seed === DEFAULT_SEED[lastPhase]) { v.seed = DEFAULT_SEED[v.phase]; form.seed.value = v.seed; }
         lastPhase = v.phase;
       }
+      document.getElementById('splitOpts').hidden = !v.money;
       const url = `${location.origin}/demo?${buildQuery(v)}`;
       document.getElementById('url').textContent = url;
       document.getElementById('run').href = url;

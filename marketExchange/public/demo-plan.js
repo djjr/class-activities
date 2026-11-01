@@ -16,7 +16,13 @@
   const sim = (typeof module !== 'undefined' && module.exports) ? require('../sim') : root.MarketSim;
   const NAMES = ['Ava', 'Kofi', 'Lin', 'Omar', 'Rosa', 'Theo', 'Zara', 'Diego'];
 
-  function plan({ phase = 'chairs', classifieds = false, money = false, seed = 1, n = 8, meetings = 24 } = {}) {
+  // split: how a payment divides the gain when one side would lose.
+  //   even   compensate the loser, then split the rest evenly (default)
+  //   winner pay just enough for the loser to accept; the winner keeps the rest
+  //   loser  pay nearly the whole gain; the loser gets most of it
+  // Payments only move tokens, so the split changes who gains, not how much
+  // the room gains, unless someone runs out of tokens and a later deal fails.
+  function plan({ phase = 'chairs', classifieds = false, money = false, split = 'even', seed = 1, n = 8, meetings = 24 } = {}) {
     // The economy depends only on (phase, seed), so panes that differ only in
     // institutions start from the same people, chairs, and benchmark.
     const econRand = sim.makeRng(seed);
@@ -48,7 +54,8 @@
       if (lo > hi) return { ...base, deal: false, why: 'no-surplus' };
       // The winner pays, and can only pay what they have.
       const payer = loserIsA ? b : a;
-      const p = Math.min(hi, Math.max(lo, Math.round(-dL + surplus / 2)), tokens[payer]);
+      const target = split === 'winner' ? lo : split === 'loser' ? hi : Math.round(-dL + surplus / 2);
+      const p = Math.min(hi, Math.max(lo, target), tokens[payer]);
       if (p < lo) return { ...base, deal: false, why: 'broke', payer };
       // pay > 0 means a pays b (same convention as market.js)
       return { ...base, deal: true, why: 'paid', pay: loserIsA ? -p : p };
@@ -95,13 +102,14 @@
     }
     const trades = events.filter(e => e.kind === 'meet' && e.deal);
     return {
-      phase, classifieds, money, seed, n, meetings,
+      phase, classifieds, money, split, seed, n, meetings,
       economy, names: NAMES.slice(0, n), start, best, events,
       final: {
         welfare: sim.welfare(economy, holdings),
         trades: trades.length,
         harmful: trades.filter(e => e.dRoom < -1e-9).length,
         meetings: events.filter(e => e.kind !== 'stable').length,
+        tokens: tokens.slice(),
       },
     };
   }

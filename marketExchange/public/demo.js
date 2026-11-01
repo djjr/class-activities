@@ -14,7 +14,8 @@ const $ = id => document.getElementById(id);
 // shown the setup screen instead of this demo if anything was wrong).
 const V = DemoSetup.values;
 const PHASE = V.phase;
-const OPTS = { phase: PHASE, classifieds: V.classifieds, money: V.money, seed: V.seed, meetings: V.meetings };
+const OPTS = { phase: PHASE, classifieds: V.classifieds, money: V.money, split: V.split, seed: V.seed, meetings: V.meetings };
+const SPLIT_WORDS = { even: 'splitting the gain evenly', winner: 'just enough to get a yes', loser: 'giving away most of the gain' };
 const SPEED = V.speed;
 const CAPTIONS = V.captions;
 const T = { meet: 1500 / SPEED, outcome: 1600 / SPEED, gap: 350 / SPEED };
@@ -28,14 +29,16 @@ const name = i => P.names[i];
 // Same chart scale in every pane that shares phase + seed: compute all four
 // institution variants and take the overall range.
 const SCALE = (() => {
-  const all = [[0, 0], [1, 0], [0, 1], [1, 1]].map(([c, m]) => DemoPlan.plan({ ...OPTS, classifieds: !!c, money: !!m }));
+  const all = [[0, 0], [1, 0], [0, 1], [1, 1]].flatMap(([c, m]) => ['even', 'winner', 'loser'].map(split =>
+    DemoPlan.plan({ ...OPTS, classifieds: !!c, money: !!m, split })));
   const ws = all.flatMap(p => [p.start, p.best, ...p.events.filter(e => e.welfare != null).map(e => e.welfare)]);
   const lo = Math.min(...ws), hi = Math.max(...ws), pad = Math.max(3, (hi - lo) * 0.1);
   return { lo: lo - pad, hi: hi + pad };
 })();
 
 $('title').textContent = V.title ||
-  (OPTS.classifieds && OPTS.money ? 'Classifieds + money' : OPTS.classifieds ? 'With classifieds' : OPTS.money ? 'With money' : 'Plain market');
+  (OPTS.classifieds && OPTS.money ? 'Classifieds + money' : OPTS.classifieds ? 'With classifieds' : OPTS.money ? 'With money' : 'Plain market') +
+  (OPTS.money && OPTS.split !== 'even' ? (OPTS.split === 'winner' ? ' · winner keeps most' : ' · loser gets most') : '');
 if (!CAPTIONS) $('caption').hidden = true;
 
 // One-line key under the board (legend=0 hides it).
@@ -175,7 +178,7 @@ function outcomeCaption(e) {
   if (e.why === 'both') s = 'Both gain, so they swap.';
   else if (e.why === 'paid') {
     const payer = e.pay > 0 ? e.a : e.b, payee = e.pay > 0 ? e.b : e.a;
-    s = `${name(payer)} pays ${name(payee)} ${Math.abs(e.pay)}, so both come out ahead. Swap.`;
+    s = `${name(payer)} pays ${name(payee)} ${Math.abs(e.pay)} (${SPLIT_WORDS[OPTS.split]}), so both come out ahead. Swap.`;
   } else if (e.why === 'no-surplus') s = 'Together they would lose, so no deal, even with money.';
   else if (e.why === 'broke') s = `${name(e.payer)} can't afford to pay enough. No deal.`;
   else if (e.why === 'neither') s = 'Neither gains. No deal.';
@@ -206,7 +209,10 @@ function shareText(w) {
   return `<b>${share}%</b> of possible gain`;
 }
 
-const MONEY_INTRO = ` Everyone starts with ${MarketSim.START_TOKENS} tokens and can pay to make a trade worth someone's while. Payments move tokens around; they don't change room welfare.`;
+const MONEY_INTRO = ` Everyone starts with ${MarketSim.START_TOKENS} tokens. ${{
+  even: 'A winner pays a loser to cover the loss and split the gain evenly.',
+  winner: 'A winner pays a loser just enough to get a yes, and keeps the rest.',
+  loser: 'A winner pays a loser nearly the whole gain.' }[OPTS.split]} Payments move tokens; they don't change room welfare.`;
 
 function reset() {
   clearTimeout(timer);
@@ -273,11 +279,13 @@ function finish() {
     ? (OPTS.money ? 'No trade left that creates value. ' : 'No trade left that both sides want. ') : '';
   const html = `${stalled}<b>Done: ${f.meetings} meetings, ${f.trades} trades.</b> Welfare ${fmt(P.start)} → <b>${fmt(f.welfare)}</b> (best ${fmt(P.best)}), ${shareText(f.welfare).replace('possible gain', 'the possible gain')}.` +
     (offices ? ` <span class="${f.harmful ? 'neg' : ''}">${f.harmful} ${f.harmful === 1 ? 'trade' : 'trades'} lowered room welfare.</span>` : '') +
+    (OPTS.money ? ` Tokens now range from <b>${Math.min(...f.tokens)}</b> to <b>${Math.max(...f.tokens)}</b>.` : '') +
     ` <button class="tool inline" data-replay>↺ Replay</button>`;
   if (CAPTIONS) { $('caption').innerHTML = html; $('caption').classList.add('final'); }
   // Captions off: the presenter narrates, so just mark the header as done.
   else $('status').innerHTML = `<b>Done</b> · ${f.meetings} meetings · ${f.trades} trades · welfare <b>${fmt(f.welfare)}</b> · ${shareText(f.welfare)}` +
-    (offices && f.harmful ? ` · <b class="neg">${f.harmful} harmful</b>` : '');
+    (offices && f.harmful ? ` · <b class="neg">${f.harmful} harmful</b>` : '') +
+    (OPTS.money ? ` · tokens ${Math.min(...f.tokens)}–${Math.max(...f.tokens)}` : '');
   finished = true;
 }
 

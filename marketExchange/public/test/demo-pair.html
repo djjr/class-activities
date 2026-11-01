@@ -25,12 +25,15 @@
     const right = q.get('right') || 'classifieds';
     q.delete('right');
     const base = q.toString();
-    const extra = { classifieds: 'classifieds=1', money: 'money=1', both: 'classifieds=1&money=1' }[right];
-    document.getElementById('left').src = `/demo?${base}`;
+    // right=split-winner / split-loser: both panes have money; left splits evenly.
+    const splitPair = right.startsWith('split-');
+    const extra = splitPair ? `money=1&split=${right.slice(6)}` : { classifieds: 'classifieds=1', money: 'money=1', both: 'classifieds=1&money=1' }[right];
+    document.getElementById('left').src = splitPair ? `/demo?${base}&money=1` : `/demo?${base}`;
     document.getElementById('right').src = `/demo?${base}&${extra}`;
     const phase = q.get('phase') || 'chairs';
     document.getElementById('bar').innerHTML = ['chairs', 'offices-random', 'offices-like-me'].flatMap(p =>
-      ['classifieds', 'money', 'both'].map(r => `<a href="?phase=${p}&right=${r}">${p} · plain vs ${r}</a>`)).join(' ');
+      ['classifieds', 'money', 'both'].map(r => `<a href="?phase=${p}&right=${r}">${p} · plain vs ${r}</a>`)).join(' ') +
+      ' · ' + ['split-winner', 'split-loser'].map(r => `<a href="?phase=chairs&right=${r}">chairs · money even vs ${r.slice(6)}</a>`).join(' ');
   </script>
 </body>
 </html>
