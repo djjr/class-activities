@@ -75,7 +75,18 @@
     return {
       bots,
       async join() {
-        for (const b of bots) await call(b, 'join', { nickname: b.nickname });
+        // Nicknames must be unique, so if another batch of bots (or a real
+        // student) already has this name, try "Maya 2", "Maya 3", ...
+        for (const b of bots) {
+          const base = b.nickname;
+          for (let k = 2; ; k++) {
+            try { await call(b, 'join', { nickname: b.nickname }); break; }
+            catch (e) {
+              if (!/already uses/.test(e.message) || k > 50) throw e;
+              b.nickname = `${base} ${k}`;
+            }
+          }
+        }
         log(`${bots.length} bots joined ${code}`);
       },
       start() {

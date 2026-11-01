@@ -259,6 +259,18 @@ app.post('/api/i/round/close', handle(() => {
   return { ok: true };
 }));
 
+// Remove fake-class bots (pids starting "bot-") from the session. They are
+// left out of the next phase; a phase already running keeps them, because
+// removing people would change its economy mid-phase.
+app.post('/api/i/remove-bots', handle(() => {
+  needSession();
+  const bots = Object.keys(session.participants).filter(pid => pid.startsWith('bot-'));
+  bots.forEach(pid => delete session.participants[pid]);
+  const inPhase = session.phase ? session.phase.pids.filter(pid => pid.startsWith('bot-')).length : 0;
+  changed();
+  return { removed: bots.length, stillInCurrentPhase: inPhase };
+}));
+
 app.post('/api/i/save', handle(() => {
   needSession();
   const phases = [...session.pastPhases, ...(session.phase ? [session.phase] : [])];
@@ -331,6 +343,13 @@ app.post('/api/s/:code/join', liveSession, handle(req => {
   if (!validPid(pid)) throw new Error('Bad participant id');
   const nick = typeof nickname === 'string' ? nickname.trim().slice(0, 16) : '';
   if (!nick) throw new Error('Please enter a nickname');
+  // Nicknames must be unique (case-insensitive) so trade lists are unambiguous.
+  // Rejoining under your own name is fine.
+  const taken = Object.entries(session.participants)
+    .some(([other, p]) => other !== pid && p.nickname.toLowerCase() === nick.toLowerCase());
+  if (taken) {
+    throw Object.assign(new Error(`Someone already uses "${nick}". Try adding an initial, like "${nick} ${'ABCDEFGHJKMNPRSTW'[crypto.randomInt(17)]}".`), { status: 409, code: 'name-taken' });
+  }
   session.participants[pid] = { nickname: nick, joinedAt: session.participants[pid]?.joinedAt || new Date().toISOString() };
   changed();
   return { ok: true };

@@ -53,10 +53,11 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 | `POST /api/i/phase` | `{type}` → generate a new economy for joined students; round 0 (closed) |
 | `POST /api/i/round/open` | `{classifieds, money}` → open the next round |
 | `POST /api/i/round/close` | Close it, withdraw pending offers, record welfare |
+| `POST /api/i/remove-bots` | Remove fake-class bots (pids starting `bot-`). They're left out of the next phase; a running phase keeps them |
 | `POST /api/i/save` · `GET /api/i/saved[/:id]` | Same as roommateDesign |
 | `GET  /api/i/stream` | SSE: room view (welfare series, benchmark, ticker, map, counts) |
 | `GET  /api/i/room` | Same payload as the stream, for scripts that poll (`fake-class --drive`) |
-| `POST /api/s/:code/join` | `{pid, nickname}` |
+| `POST /api/s/:code/join` | `{pid, nickname}`. 409 if another participant already has that nickname (case-insensitive); rejoining under your own name is fine |
 | `GET  /api/s/:code/state?pid=` | Same payload as the student stream; the bots poll this |
 | `GET  /api/s/:code/stream?pid=` | SSE: **this student's** view: item, private target, score, tokens, round state, incoming/outgoing offers, partner list or classifieds |
 | `POST /api/s/:code/preview` | `{pid, partner, pay?}` → your score change only |
@@ -136,4 +137,5 @@ Still no test suite, matching repo practice, but:
 4. Students move around as much or as little as they like. The phone is a chair card meant to be held up.
 5. A fresh economy is generated at each phase start for whoever is present. Phantoms fill office grids, never trade, and are not counted in welfare.
 6. Folder name: `marketExchange`.
+8. Nicknames are unique per session: a duplicate is refused at join with a suggested alternative (2026-11-01). The phase-level "Sam 2" renaming stays as a fallback.
 7. Score previews (`/preview`) are uncapped in every round type. The student's "You want" target is fixed for the whole phase; only holdings change.

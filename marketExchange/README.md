@@ -26,7 +26,8 @@ INSTRUCTOR_KEY=dev npm run dev
 
 Bots join the current session and trade whenever a round is open.
 
-- In the browser: `/test/fake-class?key=…`, with the room view open in another tab.
+- In the browser: `/test/fake-class?key=…`, with the room view open in another tab. **Remove all bots from session** clears them out; they're left out of the next phase.
+- Bot nicknames are unique: a second batch joins as "Maya 2", "Jordan 2", and so on.
 - From a terminal: `npm run fake -- --url http://localhost:3000 --key dev --new`
 - Add `--drive` to run a whole scripted session (all three phases × ordinary / Classifieds / Money rounds) and print the welfare curves. `--round-secs 10` sets the round length.
 

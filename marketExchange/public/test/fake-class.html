@@ -18,6 +18,9 @@
         <button class="btn" id="go">Join and start trading</button>
         <button class="btn secondary" id="stop" disabled>Stop</button>
       </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn secondary" id="removeBots">Remove all bots from session</button>
+      </div>
       <p><a id="roomLink" target="_blank">Open the room view ↗</a></p>
     </div>
     <pre id="log" class="small muted" style="white-space:pre-wrap"></pre>
@@ -40,6 +43,15 @@
         log('Bots are trading whenever a round is open.');
       } catch (e) { log('Error: ' + e.message); }
     };
+    confirmButton(document.getElementById('removeBots'), 'Click again to remove bots', async () => {
+      try {
+        if (bots) { bots.stop(); bots = null; }
+        document.getElementById('go').disabled = false;
+        document.getElementById('stop').disabled = true;
+        const r = await iapi('remove-bots', 'POST');
+        log(`Removed ${r.removed} bots.` + (r.stillInCurrentPhase ? ` ${r.stillInCurrentPhase} stay in the current phase (idle) until you start a new phase.` : ''));
+      } catch (e) { log('Error: ' + e.message); }
+    });
     document.getElementById('stop').onclick = () => { bots && bots.stop(); log('Stopped.'); document.getElementById('go').disabled = false; document.getElementById('stop').disabled = true; };
   </script>
 </body>

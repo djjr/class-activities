@@ -82,7 +82,8 @@ function renderJoin() {
     e.preventDefault();
     const nickname = $('nick').value.trim();
     store('mx-nick', nickname);
-    try { await api('join', { nickname }); } catch (err) { $('joinErr').textContent = err.message; }
+    try { await api('join', { nickname }); }
+    catch (err) { $('joinErr').textContent = err.message; $('nick').focus(); $('nick').select(); }
   };
 }
 
