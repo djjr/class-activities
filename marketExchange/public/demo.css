@@ -5,11 +5,19 @@
   display: flex; flex-direction: column; gap: 8px;
   padding: 12px 14px; cursor: pointer; user-select: none;
 }
-.demo-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+/* Same header layout in every pane, so side-by-side panes line up:
+   title and tools on row 1, status on row 2. */
+.demo-head { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 10px; row-gap: 2px; }
+.demo-head .demo-title { grid-column: 1; grid-row: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.demo-head .demo-tools { grid-column: 2; grid-row: 1; }
+.demo-head .demo-status { grid-column: 1 / -1; grid-row: 2; }
 .demo-title { font-size: clamp(18px, 3.4vw, 28px); font-weight: 800; }
 .demo-status { font-size: clamp(11px, 1.7vw, 14px); color: var(--muted); }
 .demo-caption {
-  min-height: 3.4em; font-size: clamp(13px, 2.2vw, 18px); line-height: 1.35;
+  /* Fixed at three lines so the board never jumps as captions change length,
+     and side-by-side panes stay aligned. */
+  height: calc(3 * 1.35em + 18px); overflow: hidden; flex: none;
+  font-size: clamp(12px, 2vw, 17px); line-height: 1.35;
   background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
 }
 .demo-caption .neg, .demo-summary .neg, .demo-status .neg { color: #b3261e; }
@@ -132,3 +140,13 @@ body.setup-page { overflow: auto; }
 .demo-legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; vertical-align: 0; margin: 0 2px; }
 .demo-legend .k-on { background: #14243a; }
 .demo-legend .k-want { background: #c9dbee; box-shadow: 0 0 0 2px #e8336d; }
+
+/* Pane tools: Replay and Settings, for use inside a slide (no URL bar). */
+.demo-tools { display: flex; gap: 6px; }
+.tool {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  border-radius: 999px; padding: 3px 10px; font: inherit; font-size: clamp(11px, 1.6vw, 13px); font-weight: 600;
+  cursor: pointer; opacity: .8;
+}
+.tool:hover { opacity: 1; }
+.tool.inline { margin-left: 6px; vertical-align: 1px; opacity: 1; border-color: var(--accent); color: var(--accent); }

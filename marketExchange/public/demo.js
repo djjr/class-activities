@@ -273,7 +273,7 @@ function finish() {
     ? (OPTS.money ? 'No trade left that creates value. ' : 'No trade left that both sides want. ') : '';
   const html = `${stalled}<b>Done: ${f.meetings} meetings, ${f.trades} trades.</b> Welfare ${fmt(P.start)} → <b>${fmt(f.welfare)}</b> (best ${fmt(P.best)}), ${shareText(f.welfare).replace('possible gain', 'the possible gain')}.` +
     (offices ? ` <span class="${f.harmful ? 'neg' : ''}">${f.harmful} ${f.harmful === 1 ? 'trade' : 'trades'} lowered room welfare.</span>` : '') +
-    ` <span class="hint">(R to replay)</span>`;
+    ` <button class="tool inline" data-replay>↺ Replay</button>`;
   if (CAPTIONS) { $('caption').innerHTML = html; $('caption').classList.add('final'); }
   // Captions off: the presenter narrates, so just mark the header as done.
   else $('status').innerHTML = `<b>Done</b> · ${f.meetings} meetings · ${f.trades} trades · welfare <b>${fmt(f.welfare)}</b> · ${shareText(f.welfare)}` +
@@ -294,11 +294,21 @@ function apply(cmd) {
     // Let the current beat finish visually; resume continues from the next event.
     $('overlay').hidden = false; $('overlay').textContent = '❚❚ Paused · click to resume';
   } else if (cmd === 'restart') reset();
+  else if (cmd === 'replay') { reset(); apply('play'); }
 }
 function send(cmd) { apply(cmd); if (chan) chan.postMessage(cmd); }
 if (chan) chan.onmessage = e => apply(e.data);
 
-$('demo').addEventListener('click', () => send(playing ? 'pause' : 'play'));
+$('demo').addEventListener('click', e => {
+  // Buttons in the pane do their own thing; any other click plays/pauses.
+  if (e.target.closest('[data-replay], #replayBtn')) return send('replay');
+  if (e.target.closest('#settingsBtn')) {
+    // Open the setup screen in this pane, prefilled with its current settings.
+    location.href = `/demo?${DemoSetup.buildQuery(V)}&setup`;
+    return;
+  }
+  send(playing ? 'pause' : 'play');
+});
 document.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); send(playing ? 'pause' : 'play'); }
   if (e.key === 'r' || e.key === 'R') send('restart');
