@@ -115,6 +115,7 @@ Round types differ in how hard it is to **find** a trade (step 1), not how hard 
 
 - **Ordinary round:** tap **Trade**, then tap the name of the person you're talking to (a list of joined nicknames). You see only **your own** result: "Your score: 41 → 52."
 - **Classifieds round:** **Trade** opens a sorted list: "Chairs that would raise your score" with your gain and the holder's name. You can send an offer straight from the list. You still see only your own gain.
+- **Offices swap screen** (decided 2026-11-01): after tapping an office you see a small map of the room *as it would be after the swap* (you in their office, them in yours, your new neighbors outlined), a comparison line ("You want 2 · Neighbors now 3 4 · After swap 1 4"), and a note that your old neighbors and theirs are affected too, so the externality is visible before you offer.
 - **Offices phases:** the Trade screen is a **map** of the grid. Each office shows its occupant's type as a color, yours is outlined, and phantoms are grey. Tap any office to see your score change if you swapped with its occupant. In a Classifieds round, a sorted list appears beside the map.
 
 ### Offers

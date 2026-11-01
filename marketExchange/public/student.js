@@ -235,7 +235,7 @@ function renderDetail(v) {
         <div class="compare-row"><span class="compare-label">${esc(d.label)}</span>
           ${miniBlocks(v.chairs[p][k])}<span class="muted small">want</span>${miniBlocks(v.me.target[k])}</div>`).join('')}
         <div class="muted small">Their chair (left) vs. what you want (right)</div></div>`
-    : `<p>Swap offices with <b>${esc(name)}</b>. You'd move into their office and they'd move into yours.</p>`;
+    : officeSwapHtml(v, p, name);
   const money = v.round.money ? moneyControls(v) : '';
   $('sheetBody').innerHTML = `
     ${what}
@@ -244,12 +244,45 @@ function renderDetail(v) {
     <button class="btn" id="offerBtn" style="width:100%" disabled>Offer swap</button>
     <p class="muted small center">${esc(name)} will see their own change, not yours.</p>`;
   if (v.round.money) wireMoney(v);
+  if (v.type !== 'chairs') renderSwapMap(v, p);
   $('offerBtn').onclick = async () => {
     $('offerBtn').disabled = true;
     try { await api('offer', { partner: p, pay: payOf() }); toast(`Offer sent to ${name}`); closeSheet(); }
     catch (err) { toast(err.message); $('offerBtn').disabled = false; }
   };
   updatePreview(v);
+}
+
+// Offices: show where you'd move, who your neighbors are now vs. after,
+// sorted so the two lists are easy to compare against what you want.
+function officeSwapHtml(v, p, name) {
+  const O = Offices, theirs = v.grid.cells.findIndex(c => c && c.index === p);
+  const nb = O.swapNeighbors(v.grid, v.me.office, theirs);
+  const chips = list => list.slice().sort((x, y) => x - y).map(t => O.typeChip(t)).join(' ');
+  return `
+    <p class="small" style="margin:0">You'd move into <b>${esc(name)}</b>'s office; they'd move into yours. <span class="muted">Map shows the room after the swap; your new neighbors are outlined.</span></p>
+    <div id="swapMap"></div>
+    <div class="neighbors">
+      <div><span class="nb-label">You want</span>${O.typeChip(v.me.wants, ` ${O.TYPE_WORDS[v.me.wants - 1]}`)}</div>
+      <div><span class="nb-label">Neighbors now</span>${chips(nb.now)}</div>
+      <div><span class="nb-label">After swap</span>${chips(nb.after)}</div>
+    </div>
+    <p class="muted small" style="margin:0">Your old neighbors get ${esc(name)} as a neighbor, and theirs get you. That changes their scores too.</p>`;
+}
+
+// The map is drawn as the room would look AFTER the swap, so the outlined
+// neighbors show the same types as the "After swap" list (including the
+// partner, if your two offices are adjacent).
+function renderSwapMap(v, p) {
+  const mine = v.me.office, theirs = v.grid.cells.findIndex(c => c && c.index === p);
+  const cells = v.grid.cells.slice();
+  [cells[mine], cells[theirs]] = [cells[theirs], cells[mine]];
+  const marks = { [mine]: 'from', [theirs]: 'to' };
+  for (const k of Offices.swapNeighbors(v.grid, mine, theirs).afterOffices) if (!marks[k]) marks[k] = 'nb';
+  Offices.renderOfficeMap($('swapMap'), { ...v.grid, cells }, {
+    showNames: false, marks,
+    labels: { [theirs]: 'You', [mine]: cells[mine].name },
+  });
 }
 
 function miniBlocks(n) {
