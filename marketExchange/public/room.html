@@ -37,19 +37,23 @@
     </section>
 
     <footer class="controls">
-      <div class="ctl-group">
+      <div class="ctl-group admin-only">
         <span class="ctl-label">Start phase</span>
         <button class="btn small secondary" data-phase="chairs">Chairs</button>
         <button class="btn small secondary" data-phase="offices-random">Offices: random</button>
         <button class="btn small secondary" data-phase="offices-like-me">Offices: like me</button>
       </div>
-      <div class="ctl-group" id="roundCtl">
+      <div class="ctl-group admin-only" id="roundCtl">
         <label class="check"><input type="checkbox" id="optClassifieds"> Classifieds</label>
         <label class="check"><input type="checkbox" id="optMoney"> Money</label>
         <button class="btn small" id="openBtn">Open round</button>
         <button class="btn small warn" id="closeBtn" hidden>Close round</button>
       </div>
       <div class="ctl-group">
+        <span class="view-only-note">Display only</span>
+        <span id="lock"></span>
+      </div>
+      <div class="ctl-group admin-only">
         <label class="check"><input type="checkbox" id="optNames"> Show names</label>
         <button class="btn small secondary" id="saveBtn">Save</button>
         <button class="btn small secondary" id="newBtn">New session</button>

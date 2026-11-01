@@ -43,11 +43,18 @@ npm run check      # sim.js (Hungarian vs brute force, bot classes) + market.js 
 A second service in the same Railway project as roommateDesign:
 
 - Repo `djjr/class-activities`, root directory `/marketExchange`, start command `npm start` (auto-detected).
-- Add a Volume at `/data`, then set `DATA_DIR=/data`, `INSTRUCTOR_KEY=…`, and `PUBLIC_URL=https://<this service's domain>`.
+- Add a Volume at `/data`, then set `DATA_DIR=/data`, `INSTRUCTOR_KEY=…` (view key, goes in the deck), `ADMIN_KEY=…` (different, kept private), and `PUBLIC_URL=https://<this service's domain>`.
 - One replica (state is in memory).
 - **Watch Paths:** set `/marketExchange/**` on this service and `/roommateDesign/**` on the roommate service, so a push to one activity doesn't redeploy the other.
 - Check a deploy with `curl …/version`.
 
-## slides.com
+## Keys and slides.com
 
-Embed `/i/welcome?key=…` and `/i/room?key=…` as iframes. Both always target the current session, so the deck URLs never change. Keep the deck private: the key is in the URL.
+There are two keys, so the deck can be public:
+
+- **`INSTRUCTOR_KEY` (view key)** goes in the deck's iframe URLs: `/i/welcome?key=…` and `/i/room?key=…`. Anyone with the deck can see the join slide and a display-only room view, with no names and no controls.
+- **`ADMIN_KEY`** unlocks the controls, names, and saved sessions. Click the 🔒 in the room view (or the welcome slide) on your own laptop and type it once. Your browser remembers it, including inside the slides.com iframe, and it never appears in any URL in the deck. 🔓 Lock forgets it.
+- If `ADMIN_KEY` isn't set, it falls back to `INSTRUCTOR_KEY` (the old single-key behavior). Locally, `INSTRUCTOR_KEY=dev` means you unlock with `dev`.
+- The fake-class CLI takes `--admin KEY` for `--new`/`--drive` (it defaults to `--key`).
+
+Both slide URLs always target the current session, so the deck URLs never change.

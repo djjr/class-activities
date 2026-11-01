@@ -44,7 +44,7 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 
 ## API
 
-`/api/i/*` routes require `key`.
+`/api/i/*` routes require the view key (`key`). Every `POST /api/i/*` and `GET /api/i/saved*` also requires the admin key (`X-Admin-Key` header, or `admin=` for EventSource and download links). See **Keys** below. `GET /api/i/whoami` → `{admin}`.
 
 | Method & path | Purpose |
 |---|---|
@@ -68,6 +68,15 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 `pid` is a browser UUID in `localStorage`, as in roommateDesign.
 
 **Atomicity.** Node runs one request handler at a time, so `respond` can check the holdings and tokens and then apply the swap without locks. If either party's item changed since the offer was made (each offer stores the items it was made against), the offer is rejected as stale.
+
+## Keys (decided 2026-11-01)
+
+The deck is public (students have it), so the key in its iframe URLs can't be secret.
+
+- `INSTRUCTOR_KEY` is the **view key**: join slide plus a display-only room view. The instructor stream and `/api/i/room` **strip names** for view-only clients (ticker names, map names).
+- `ADMIN_KEY` is the **control key**: phase/round controls, New session, Save, Remove bots, saved sessions, and names. It is typed into the page once (🔒) and kept in `localStorage`, never in a deck URL. Elements with class `admin-only` show only when `body.is-admin`.
+- If `ADMIN_KEY` is unset it falls back to `INSTRUCTOR_KEY`, so an existing single-key deploy keeps working until the variable is added.
+- Same scheme in roommateDesign, so the two activities stay parallel.
 
 ## Live state (in memory)
 
@@ -125,7 +134,7 @@ Still no test suite, matching repo practice, but:
 ## Railway
 
 - A **new service** in the same project, repo `djjr/class-activities`, root directory `/marketExchange`.
-- Its own volume at `/data` with `DATA_DIR=/data`, plus `INSTRUCTOR_KEY` and `PUBLIC_URL`. One replica.
+- Its own volume at `/data` with `DATA_DIR=/data`, plus `INSTRUCTOR_KEY` (view), `ADMIN_KEY` (control, different), and `PUBLIC_URL`. One replica.
 - **Set Watch Paths on both services** (`/marketExchange/**` here, `/roommateDesign/**` on the existing one). Otherwise every push to `main` redeploys both services, including one that might be live in class.
 - `/healthz` and `/version` as in roommateDesign.
 

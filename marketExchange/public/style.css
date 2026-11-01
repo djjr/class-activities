@@ -286,3 +286,13 @@ body.slide { overflow: hidden; }
 .neighbors { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .neighbors > div { display: flex; align-items: center; gap: 6px; font-size: 14px; }
 .nb-label { width: 110px; font-weight: 700; font-size: 13px; color: var(--muted); }
+
+/* ---------------------------------------------------------- admin lock */
+body:not(.is-admin) .admin-only { display: none !important; }
+.lock { font-size: 14px; opacity: 0.55; }
+.lock:hover { opacity: 1; }
+.unlock { display: inline-flex; gap: 6px; align-items: center; }
+.unlock input { width: 140px; padding: 6px 8px; font-size: 14px; border: 1px solid var(--line); border-radius: 8px; }
+.unlock-err { color: #b3261e; font-size: 13px; }
+.view-only-note { font-size: 13px; color: var(--muted); }
+body.is-admin .view-only-note { display: none; }

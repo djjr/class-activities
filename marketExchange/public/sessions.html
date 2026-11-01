@@ -10,17 +10,19 @@
   <main class="narrow" style="max-width:720px">
     <h1>Saved sessions</h1>
     <p class="muted">Anonymized: economies, trades, and welfare by round. No names.</p>
+    <p><span id="lock"></span></p>
     <div id="list"></div>
   </main>
   <script src="/instructor.js"></script>
   <script>
     const LABEL = { chairs: 'Chairs', 'offices-random': 'Offices: random', 'offices-like-me': 'Offices: like me' };
+    adminGate(document.getElementById('lock'));
     iapi('saved').then(list => {
       document.getElementById('list').innerHTML = list.length ? list.map(s => `
         <div class="panel saved-row">
           <div><b>${esc(s.code)}</b> · ${new Date(s.createdAt).toLocaleString()}<br>
           <span class="muted">${s.nJoined} joined · ${s.phases.map(t => LABEL[t] || t).join(', ') || 'no phases'}</span></div>
-          <a class="btn secondary" href="/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}">JSON</a>
+          <a class="btn secondary" href="/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}&admin=${encodeURIComponent(adminKey())}">JSON</a>
         </div>`).join('') : '<p class="muted">Nothing saved yet.</p>';
     }).catch(e => { document.getElementById('list').textContent = e.message; });
   </script>

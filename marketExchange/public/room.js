@@ -9,7 +9,7 @@ const signed = x => (x > 1e-9 ? '+' : x < -1e-9 ? '−' : '±') + fmt(Math.abs(x
 let last = null;
 let flash = { at: null, until: 0, set: new Set() };
 
-istream(msg => { last = msg; render(); });
+adminGate($('lock')).then(() => istream(msg => { last = msg; render(); }));
 window.addEventListener('resize', () => render());
 $('optNames').onchange = () => render();
 
@@ -98,7 +98,7 @@ function niceTicks(lo, hi, n) {
 
 // ---------------------------------------------------------------- ticker
 function renderTicker(p) {
-  const names = $('optNames').checked, offices = p.type !== 'chairs';
+  const names = last.admin && $('optNames').checked, offices = p.type !== 'chairs';
   const newest = p.ticker[0];
   // Flash the two traders' offices for a few seconds after a harmful swap.
   if (newest && newest.at !== flash.at) {
@@ -121,7 +121,7 @@ function renderMap(p) {
   if (!p.grid) { $('mapWrap').hidden = true; return; }
   $('mapWrap').hidden = false;
   const highlight = Date.now() < flash.until ? flash.set : new Set();
-  Offices.renderOfficeMap($('map'), p.grid, { showNames: $('optNames').checked, highlight });
+  Offices.renderOfficeMap($('map'), p.grid, { showNames: last.admin && $('optNames').checked, highlight });
   $('legend').innerHTML = [1, 2, 3, 4, 5].map(t => Offices.typeChip(t, ` ${Offices.TYPE_WORDS[t - 1]}`)).join(' ') +
     ' <span class="type-chip phantom-chip">·</span> empty (fixed neighbor)';
 }

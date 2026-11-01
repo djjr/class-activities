@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Add bot students to a running Market Exchange session.
 //
-//   npm run fake -- --url http://localhost:3000 --key dev [--n 18] [--new] [--drive]
+//   npm run fake -- --url http://localhost:3000 --key dev [--admin KEY] [--n 18] [--new] [--drive]
 //
+//   --admin  admin key, needed for --new and --drive (defaults to --key,
+//            which works locally where ADMIN_KEY is unset)
 //   --new    start a fresh session first
 //   --drive  also run a whole scripted session (all three phases, three
 //            rounds each: ordinary, Classifieds, Money), print the welfare
@@ -14,12 +16,13 @@ const args = process.argv.slice(2);
 const opt = (name, dflt) => { const i = args.indexOf('--' + name); return i < 0 ? dflt : (args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true); };
 const base = String(opt('url', 'http://localhost:3000')).replace(/\/$/, '');
 const key = String(opt('key', 'dev'));
+const admin = String(opt('admin', key));
 const n = Number(opt('n', 18));
 const roundSecs = Number(opt('round-secs', 10));
 
 async function iapi(path, method = 'GET', body) {
   const res = await fetch(`${base}/api/i/${path}?key=${encodeURIComponent(key)}`, {
-    method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined,
+    method, headers: { 'Content-Type': 'application/json', 'X-Admin-Key': admin }, body: body ? JSON.stringify(body) : undefined,
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json.error || res.status);

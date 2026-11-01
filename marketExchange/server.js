@@ -16,11 +16,21 @@ const market = require('./market');
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const PUBLIC_URL = (process.env.PUBLIC_URL || '').replace(/\/$/, '');
+// Two keys (see ARCHITECTURE.md, "Keys"):
+//   INSTRUCTOR_KEY  view key. Goes in the deck's iframe URLs, which are public.
+//                   Shows the join slide and room view, without names or controls.
+//   ADMIN_KEY       control key. Typed once into the room view on the
+//                   instructor's own browser (kept in localStorage, never in a
+//                   URL in the deck). Unlocks controls, names, and saved sessions.
+// If ADMIN_KEY is unset it falls back to INSTRUCTOR_KEY, i.e. the old
+// single-key behavior, so a deploy keeps working until the variable is added.
 let INSTRUCTOR_KEY = process.env.INSTRUCTOR_KEY;
 if (!INSTRUCTOR_KEY) {
   INSTRUCTOR_KEY = 'dev';
   console.warn('INSTRUCTOR_KEY not set; using "dev". Set it in production.');
 }
+const ADMIN_KEY = process.env.ADMIN_KEY || INSTRUCTOR_KEY;
+if (!process.env.ADMIN_KEY) console.warn('ADMIN_KEY not set; controls use INSTRUCTOR_KEY. Set ADMIN_KEY before sharing the deck.');
 
 const LIVE_FILE = path.join(DATA_DIR, 'live.json');
 const SAVED_DIR = path.join(DATA_DIR, 'saved');
@@ -82,7 +92,7 @@ try {
 
 // ---------- SSE ----------
 
-const instructorClients = new Set();
+const instructorClients = new Set(); // { res, admin }
 const studentClients = new Set(); // { res, code, pid }
 
 function openStream(req, res) {
@@ -99,15 +109,25 @@ function send(res, payload) {
   res.write(`data: ${JSON.stringify(payload)}\n\n`);
 }
 
-function instructorPayload() {
-  if (!session) return { session: null };
+// Names are included only for admin streams. The view key is public (it is in
+// the deck), so the display-only room view shows trades without names.
+function instructorPayload(admin) {
+  if (!session) return { session: null, admin };
+  const phase = session.phase ? market.roomView(session.phase) : null;
+  if (phase && !admin) stripNames(phase);
   return {
     session: { code: session.code, createdAt: session.createdAt },
+    admin,
     counts: counts(),
-    phase: session.phase ? market.roomView(session.phase) : null,
+    phase,
     history: session.pastPhases.map(market.phaseSummary),
     phaseTypes: sim.PHASE_TYPES,
   };
+}
+
+function stripNames(view) {
+  view.ticker = view.ticker.map(({ nameA, nameB, ...t }) => t);
+  if (view.grid) view.grid = { ...view.grid, cells: view.grid.cells.map(c => (c ? (({ name, ...rest }) => rest)(c) : c)) };
 }
 
 // Per-student payload. Students who joined after the phase started wait.
@@ -120,8 +140,11 @@ function studentPayload(pid) {
 }
 
 function broadcast() {
-  const ip = instructorPayload();
-  for (const res of instructorClients) send(res, ip);
+  const payloads = {};
+  for (const c of instructorClients) {
+    const key = c.admin ? 'admin' : 'view';
+    send(c.res, payloads[key] = payloads[key] || instructorPayload(c.admin));
+  }
   if (!session) return;
   for (const c of studentClients) {
     if (c.code === session.code) send(c.res, studentPayload(c.pid));
@@ -141,7 +164,7 @@ function changed() {
 
 // Keep connections alive through Railway's proxy.
 setInterval(() => {
-  for (const res of instructorClients) res.write(': ping\n\n');
+  for (const c of instructorClients) c.res.write(': ping\n\n');
   for (const c of studentClients) c.res.write(': ping\n\n');
 }, 25000);
 
@@ -198,14 +221,30 @@ const handle = fn => (req, res) => {
 
 // ----- Instructor API -----
 
+function keyMatches(given, want) {
+  const a = Buffer.from(String(given || '')), b = Buffer.from(want);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+// Admin key: header (fetch) or ?admin= (EventSource and download links,
+// which can't set headers). The view key alone never grants admin.
+const isAdmin = req => keyMatches(req.get('x-admin-key') || req.query.admin, ADMIN_KEY);
+
 function requireKey(req, res, next) {
-  const given = Buffer.from(String(req.query.key || req.get('x-instructor-key') || ''));
-  const want = Buffer.from(INSTRUCTOR_KEY);
-  if (given.length === want.length && crypto.timingSafeEqual(given, want)) return next();
+  const view = req.query.key || req.get('x-instructor-key');
+  if (keyMatches(view, INSTRUCTOR_KEY) || keyMatches(view, ADMIN_KEY) || isAdmin(req)) return next();
   res.status(401).json({ error: 'Bad instructor key' });
+}
+function requireAdmin(req, res, next) {
+  if (isAdmin(req)) return next();
+  res.status(403).json({ error: 'Controls are locked. Unlock with the admin key.' });
 }
 
 app.use('/api/i', requireKey);
+// Everything that changes state, plus saved sessions, needs the admin key.
+app.post('/api/i/*', requireAdmin);
+app.get('/api/i/saved*', requireAdmin);
+
+app.get('/api/i/whoami', (req, res) => res.json({ admin: isAdmin(req) }));
 
 app.get('/api/i/current', async (req, res) => {
   if (!session) createSession();
@@ -305,13 +344,14 @@ app.get('/api/i/saved/:id', (req, res) => {
 });
 
 // Same payload as the stream, for scripts (fake-class --drive) that poll.
-app.get('/api/i/room', handle(() => instructorPayload()));
+app.get('/api/i/room', handle(req => instructorPayload(isAdmin(req))));
 
 app.get('/api/i/stream', (req, res) => {
   openStream(req, res);
-  instructorClients.add(res);
-  send(res, instructorPayload());
-  req.on('close', () => instructorClients.delete(res));
+  const client = { res, admin: isAdmin(req) };
+  instructorClients.add(client);
+  send(res, instructorPayload(client.admin));
+  req.on('close', () => instructorClients.delete(client));
 });
 
 // ----- Student API -----
