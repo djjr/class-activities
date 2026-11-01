@@ -121,7 +121,7 @@ Still no test suite, matching repo practice, but:
 - `public/student.*`: join → wait → chair card or office map → trade sheet (names / classifieds) → preview → offer; incoming offers float over the card.
 - `public/room.*`: projected view and controls. Hand-rolled SVG chart sized to its box.
 - `public/card.js`, `public/offices.js`: chair card and office map, shared.
-- `public/demo-plan.js`: computes a whole slide demo (economy and events) from a seed; works in Node and the browser. `public/demo.*` animates it. `scripts/demo-seeds.js` searches for seeds that tell each phase's story.
+- `public/demo-plan.js`: computes a whole slide demo (economy and events) from a seed; works in Node and the browser. `public/demo-setup.js` checks the URL and shows the setup screen (selectors + copyable iframe URL) when settings are missing or wrong; `public/demo.*` animates the run. `scripts/demo-seeds.js` searches for seeds that tell each phase's story.
 - `public/test/fake-class.*`, `scripts/fake-class.js`: bots (shared logic).
 - `scripts/check-sim.js`, `scripts/check-market.js`: headless checks (`npm run check`).
 

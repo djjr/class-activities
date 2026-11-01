@@ -6,22 +6,17 @@
 // Items are absolutely positioned over their slot, so a swap is just two
 // items transitioning to each other's slot coordinates.
 
-const $ = id => document.getElementById(id);
-const q = new URLSearchParams(location.search);
-const flag = (name, dflt) => (q.has(name) ? !['0', 'false', 'no'].includes(q.get(name)) : dflt);
+(function () {
+if (!DemoSetup.ok) return;   // the setup screen is showing instead
 
-const PHASE = q.get('phase') || 'chairs';
-// Defaults chosen by scripts/demo-seeds.js so each phase tells its story.
-const DEFAULT_SEED = { chairs: 17, 'offices-random': 156, 'offices-like-me': 39 };
-const OPTS = {
-  phase: PHASE,
-  classifieds: flag('classifieds', false),
-  money: flag('money', false),
-  seed: Number(q.get('seed')) || DEFAULT_SEED[PHASE] || 1,
-  meetings: Number(q.get('meetings')) || 24,
-};
-const SPEED = Math.max(0.25, Number(q.get('speed')) || 1);
-const CAPTIONS = flag('captions', true);
+const $ = id => document.getElementById(id);
+// Settings come from demo-setup.js, which has already checked the URL (and
+// shown the setup screen instead of this demo if anything was wrong).
+const V = DemoSetup.values;
+const PHASE = V.phase;
+const OPTS = { phase: PHASE, classifieds: V.classifieds, money: V.money, seed: V.seed, meetings: V.meetings };
+const SPEED = V.speed;
+const CAPTIONS = V.captions;
 const T = { meet: 1500 / SPEED, outcome: 1600 / SPEED, gap: 350 / SPEED };
 
 const P = DemoPlan.plan(OPTS);
@@ -39,7 +34,7 @@ const SCALE = (() => {
   return { lo: lo - pad, hi: hi + pad };
 })();
 
-$('title').textContent = q.get('title') ||
+$('title').textContent = V.title ||
   (OPTS.classifieds && OPTS.money ? 'Classifieds + money' : OPTS.classifieds ? 'With classifieds' : OPTS.money ? 'With money' : 'Plain market');
 if (!CAPTIONS) $('caption').hidden = true;
 
@@ -271,7 +266,7 @@ function finish() {
 // ---------------------------------------------------------------- controls
 // Panes on the same slide (same origin) stay in step via BroadcastChannel:
 // clicking either one starts or pauses both.
-const chan = 'BroadcastChannel' in window ? new BroadcastChannel('mx-demo-' + (q.get('group') || 'default')) : null;
+const chan = 'BroadcastChannel' in window ? new BroadcastChannel('mx-demo-' + (V.group || 'default')) : null;
 function apply(cmd) {
   if (cmd === 'play') {
     if (finished) return;
@@ -296,3 +291,4 @@ window.addEventListener('resize', () => { place(holdings, false); drawChart(k); 
 buildBoard();
 // Wait a frame so the grid has its size before placing items.
 requestAnimationFrame(() => reset());
+})();

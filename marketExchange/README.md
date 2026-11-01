@@ -39,6 +39,7 @@ A self-contained animation of 8 bot traders for explaining the game. No session 
 - Click either pane to start; the other starts with it (and pausing works the same way). Space pauses or resumes, → steps once paused, R replays. It stops on a summary.
 - Options: `phase` (`chairs`, `offices-random`, `offices-like-me`), `seed`, `speed` (1 = about 3.5 s per meeting), `meetings` (24), `captions=0` (you narrate), `title`, `group` (to keep two demo pairs on different slides from syncing with each other).
 - Default seeds tell each phase's story (chosen with `node scripts/demo-seeds.js`). Chairs (17): plain 55% · classifieds 76% · money 81% (two deals fail because the winner can't afford enough) · both 100%. Offices random (156): plain ends *below* the start; classifieds 24% with 9 harmful swaps. Offices like me (39): plain 53% after 24 meetings; classifieds sorts the room in 3 meetings, 93%.
+- **Setup screen:** `/demo` with no settings, a URL with a mistake, or `?setup` shows selectors for every option, the finished iframe URL with a Copy button (plus the matching plain-market pane's URL), and a Run button. Mistyped names and values are reported with suggestions (`clasifieds` → classifieds), instead of a blank demo.
 - Preview two panes at `/test/demo-pair.html?phase=chairs&right=classifieds` (`right` = `classifieds`, `money`, or `both`).
 
 ## Fake class

@@ -10,7 +10,8 @@
 <body class="slide">
   <!-- Slide demo. No server state: the whole run is computed from the URL.
        /demo?phase=chairs&classifieds=1&money=0&seed=17&speed=1&captions=1
-       Two panes with the same phase+seed start from the same economy. -->
+       Two panes with the same phase+seed start from the same economy.
+       A bad or empty URL (or ?setup) shows a setup screen instead. -->
   <div class="demo" id="demo">
     <header class="demo-head">
       <div class="demo-title" id="title"></div>
@@ -25,6 +26,7 @@
   <script src="/sim.js"></script>
   <script src="/offices.js"></script>
   <script src="/demo-plan.js"></script>
+  <script src="/demo-setup.js"></script>
   <script src="/demo.js"></script>
 </body>
 </html>
