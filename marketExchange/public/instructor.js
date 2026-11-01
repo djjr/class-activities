@@ -46,7 +46,7 @@ async function adminGate(el) {
     el.innerHTML = '<button class="link lock" title="Lock controls on this browser">🔓 Lock</button>';
     el.querySelector('button').onclick = () => { setAdminKey(''); location.reload(); };
   } else {
-    el.innerHTML = `<button class="link lock" title="Unlock controls">🔒</button>
+    el.innerHTML = `<button class="link lock" title="Unlock instructor controls">🔒 Unlock</button>
       <form class="unlock" hidden><input type="password" placeholder="Admin key" autocomplete="current-password"><button class="link">Unlock</button><span class="unlock-err"></span></form>`;
     const form = el.querySelector('form');
     el.querySelector('.lock').onclick = () => { form.hidden = !form.hidden; if (!form.hidden) form.querySelector('input').focus(); };
