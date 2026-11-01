@@ -205,7 +205,7 @@ dialog::backdrop { background: rgb(0 0 0 / .45); }
 
 /* ---------- admin lock (same scheme as marketExchange) ---------- */
 body:not(.is-admin) .admin-only { display: none !important; }
-.lock { font-size: 14px; opacity: 0.55; text-decoration: none !important; }
+.lock { font-size: 14px; opacity: 0.8; text-decoration: none !important; }
 .lock:hover { opacity: 1; }
 .unlock { display: inline-flex; gap: 6px; align-items: center; }
 .unlock input { width: 140px; padding: 6px 8px; font-size: 14px; border: 1px solid var(--line); border-radius: 8px; }
