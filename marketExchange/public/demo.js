@@ -59,7 +59,7 @@ function buildBoard() {
   for (let k = 0; k < 8; k++) {
     const s = document.createElement('div');
     s.className = 'd-slot';
-    if (!offices) s.innerHTML = `<div class="d-name">${name(k)}</div><div class="d-score" data-score></div>`;
+    if (!offices) s.innerHTML = `<div class="d-name">${name(k)}</div><div class="d-score" data-score></div>${OPTS.money ? '<div class="d-tokens" data-tokens></div>' : ''}`;
     board.appendChild(s); slots.push(s);
   }
   const nItems = 8;
@@ -76,7 +76,7 @@ function buildBoard() {
       it.style.background = Offices.TYPE_COLORS[t - 1];
       it.classList.add(t === 3 || t === 4 ? 'ink-dark' : 'ink-light');
       it.innerHTML = `<div class="d-type">${t}</div><div class="d-pname">${name(i)}</div>
-        <div class="d-wants">wants ${Offices.typeChip(E.wants[i])}</div><div class="d-score" data-score></div>`;
+        <div class="d-wants">wants ${Offices.typeChip(E.wants[i])}</div><div class="d-score" data-score></div>${OPTS.money ? '<div class="d-tokens" data-tokens></div>' : ''}`;
     }
     board.appendChild(it); items.push(it);
   }
@@ -106,13 +106,20 @@ function showScores(holdings) {
   else slots.forEach((s, i) => { s.querySelector('[data-score]').textContent = fmt(sc[i]); });
 }
 
+// Money panes: a coin counter on each person (tokens are not part of welfare).
+function showTokens(tokens) {
+  if (!OPTS.money) return;
+  for (let i = 0; i < 8; i++) personEl(i).querySelector('[data-tokens]').innerHTML = `<span class="coin"></span>${tokens[i]}`;
+}
+
 // The element that represents person i (for highlights and badges).
 const personEl = i => (offices ? items[i] : slots[i]);
 
 function badge(el, text, cls) {
   const bdg = document.createElement('div');
   bdg.className = `d-badge ${cls}`;
-  bdg.textContent = text;
+  if (cls.includes('pay')) bdg.innerHTML = `<span class="coin"></span>${text}`;
+  if (!cls.includes('pay')) bdg.textContent = text;
   el.appendChild(bdg);
   setTimeout(() => bdg.remove(), T.meet + T.outcome);
 }
@@ -157,6 +164,7 @@ function outcomeCaption(e) {
     const payer = e.pay > 0 ? e.a : e.b, payee = e.pay > 0 ? e.b : e.a;
     s = `${name(payer)} pays ${name(payee)} ${Math.abs(e.pay)}, so both come out ahead. Swap.`;
   } else if (e.why === 'no-surplus') s = 'Together they would lose, so no deal, even with money.';
+  else if (e.why === 'broke') s = `${name(e.payer)} can't afford to pay enough. No deal.`;
   else if (e.why === 'neither') s = 'Neither gains. No deal.';
   else s = `${e.dA > e.dB ? name(e.b) : name(e.a)} would lose. No deal.`;
   if (e.deal && offices) {
@@ -185,6 +193,8 @@ function shareText(w) {
   return `<b>${share}%</b> of possible gain`;
 }
 
+const MONEY_INTRO = ` Everyone starts with ${MarketSim.START_TOKENS} tokens and can pay to make a trade worth someone's while. Payments move tokens around; they don't change room welfare.`;
+
 function reset() {
   clearTimeout(timer);
   k = 0; holdings = E.start.slice(); playing = false; started = false; finished = false;
@@ -193,10 +203,10 @@ function reset() {
   $('overlay').textContent = '▶ Click to start';
   items.forEach(it => it.classList.remove('meeting'));
   slots.forEach(s => s.classList.remove('meeting'));
-  place(holdings, false); showScores(holdings); drawChart(0); status();
+  place(holdings, false); showScores(holdings); showTokens(new Array(8).fill(MarketSim.START_TOKENS)); drawChart(0); status();
   setCaption(offices
-    ? `Eight people, eight offices. Each wants neighbors of a certain type. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? ' Side payments allowed.' : ''}`
-    : `Eight people, eight chairs. Each wants a different chair. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? ' Side payments allowed.' : ''}`);
+    ? `Eight people, eight offices. Each wants neighbors of a certain type. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? MONEY_INTRO : ''}`
+    : `Eight people, eight chairs. Each wants a different chair. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? MONEY_INTRO : ''}`);
 }
 
 // One event in three beats: meet (highlight + each side's gain), outcome
@@ -223,7 +233,12 @@ function step() {
       place(holdings, true);
       // Offices: show the effect on everyone else whose score changed.
       if (offices) e.deltas.forEach((d, i) => { if (i !== e.a && i !== e.b && Math.abs(d) > 1e-9) badge(items[i], signed(d), d > 0 ? 'pos' : 'neg'); });
-      setTimeout(() => showScores(holdings), T.outcome * 0.55);
+      setTimeout(() => { showScores(holdings); showTokens(e.tokens); }, T.outcome * 0.55);
+      if (e.pay) {
+        const payer = e.pay > 0 ? e.a : e.b, payee = e.pay > 0 ? e.b : e.a, amt = Math.abs(e.pay);
+        badge(personEl(payer), `−${amt}`, 'pay out');
+        badge(personEl(payee), `+${amt}`, 'pay in');
+      }
     } else {
       A.classList.add('nodeal'); B.classList.add('nodeal');
     }

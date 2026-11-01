@@ -144,7 +144,7 @@ To explain the game before playing, a slide shows two `/demo` panes side by side
 
 - 8 people, 4 wide × 2 tall for both chairs and offices.
 - Each meeting is narrated in three beats: who meets and each side's own gain; the outcome (swap, payment, or no deal; in offices, the neighbors' change and the room's); then a short pause.
-- Plain market: random pairs meet. Classifieds: someone goes down their list, best first, until a partner also gains. Money: the winner pays the loser enough to accept, splitting the surplus in whole tokens.
+- Plain market: random pairs meet. Classifieds: someone goes down their list, best first, until a partner also gains. Money: the winner pays the loser enough to accept, splitting the surplus in whole tokens. Everyone starts with 20 tokens, shown as a coin counter on each person (added 2026-11-01); a deal fails if the winner can't afford it. Tokens never count toward welfare.
 - Captions on by default (`captions=0` to narrate yourself). Starts on click; panes stay in step; stops on a summary.
 
 ## Saved snapshot (`sim.snapshot()`, no names)

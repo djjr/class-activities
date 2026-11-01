@@ -84,3 +84,22 @@
   border: 0; border-radius: 999px; padding: 14px 24px; cursor: pointer;
   background: rgba(29,29,31,.85); color: #fff; font: inherit; font-weight: 700; font-size: clamp(14px, 2.4vw, 20px);
 }
+
+/* Money panes: coin counters and payment badges */
+.coin { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 50%; margin-right: 3px; vertical-align: -0.05em;
+  background: radial-gradient(circle at 35% 35%, #ffe58a, #e0a800); box-shadow: 0 0 0 1px rgba(120, 80, 0, .5); }
+.d-tokens {
+  position: absolute; left: 6px; z-index: 3; font-weight: 800; font-size: clamp(11px, 1.7vw, 14px);
+  background: rgba(255, 255, 255, .92); color: #3a2a00; border-radius: 999px; padding: 1px 7px;
+}
+.d-slot .d-tokens { top: 4px; }
+.d-item .d-tokens { bottom: 5px; }
+.d-badge { white-space: nowrap; }
+/* Payment badges sit at the bottom-right corner so they don't cover the
+   "wants" chip or the gain badge at the top. */
+.d-badge.pay {
+  background: #fff4c2; color: #6b4e00; border: 2px solid #e0a800;
+  left: auto; right: -8px; top: auto; bottom: -10px; transform: none;
+}
+@keyframes badge-money { from { transform: scale(.6); opacity: 0; } }
+.d-badge.pay { animation-name: badge-money; }

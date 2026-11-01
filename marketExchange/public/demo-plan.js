@@ -8,7 +8,7 @@
 // plan({ phase, classifieds, money, seed, n = 8, meetings = 24 }) ->
 //   { economy, names, start, best, events: [...], final }
 // Event kinds:
-//   meet    { a, b, dA, dB, traders, dRoom, pay, deal, why, holdings, welfare, deltas }
+//   meet    { a, b, dA, dB, traders, dRoom, pay, deal, why, holdings, welfare, deltas, tokens }
 //   search  { a, found: false }                       (classifieds: nobody on a's list says yes)
 //   stable  {}                                       (no trade left that this market allows)
 
@@ -27,6 +27,9 @@
     const rand = sim.makeRng(seed * 7919 + 17);
     const holdings = economy.start.slice();
     const start = sim.welfare(economy, holdings);
+    // Everyone starts with the same tokens as in the real game. Payments move
+    // tokens between people but never change room welfare.
+    const tokens = new Array(n).fill(sim.START_TOKENS);
     const events = [];
 
     // Would these two trade, and with what payment? Traders look only at their
@@ -43,7 +46,10 @@
       const loserIsA = dA <= dB, dL = loserIsA ? dA : dB, dW = loserIsA ? dB : dA;
       const lo = Math.floor(-dL) + 1, hi = Math.ceil(dW) - 1;   // loser needs > -dL, winner keeps > 0
       if (lo > hi) return { ...base, deal: false, why: 'no-surplus' };
-      const p = Math.min(hi, Math.max(lo, Math.round(-dL + surplus / 2)));
+      // The winner pays, and can only pay what they have.
+      const payer = loserIsA ? b : a;
+      const p = Math.min(hi, Math.max(lo, Math.round(-dL + surplus / 2)), tokens[payer]);
+      if (p < lo) return { ...base, deal: false, why: 'broke', payer };
       // pay > 0 means a pays b (same convention as market.js)
       return { ...base, deal: true, why: 'paid', pay: loserIsA ? -p : p };
     }
@@ -56,6 +62,7 @@
     function apply(d) {
       const before = sim.scores(economy, holdings);
       [holdings[d.a], holdings[d.b]] = [holdings[d.b], holdings[d.a]];
+      tokens[d.a] -= d.pay; tokens[d.b] += d.pay;
       const after = sim.scores(economy, holdings);
       return { deltas: after.map((x, i) => x - before[i]) };
     }
@@ -82,6 +89,7 @@
       const ev = { kind: 'meet', ...d };
       if (d.deal) Object.assign(ev, apply(d));
       ev.holdings = holdings.slice();
+      ev.tokens = tokens.slice();
       ev.welfare = sim.welfare(economy, holdings);
       events.push(ev);
     }
