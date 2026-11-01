@@ -120,12 +120,12 @@
 
   // base: server URL ('' for same origin). log(line) reports progress.
   // shouldStop() lets a caller cancel between students.
-  async function run({ base = '', key, n = 25, delay = 0, newSession = false, code = null,
+  async function run({ base = '', key, admin = '', n = 25, delay = 0, newSession = false, code = null,
     log = () => {}, shouldStop = () => false }) {
     async function req(path, method = 'GET', body) {
       const res = await fetch(base + path, {
         method,
-        headers: body ? { 'Content-Type': 'application/json' } : {},
+        headers: { 'X-Admin-Key': admin || '', ...(body ? { 'Content-Type': 'application/json' } : {}) },
         body: body ? JSON.stringify(body) : undefined,
       });
       const json = await res.json().catch(() => ({}));

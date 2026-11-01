@@ -18,7 +18,7 @@
       <p id="err" class="muted"></p>
     </div>
   </main>
-  <div class="corner"><button id="newBtn" class="link small">New session</button></div>
+  <div class="corner"><button id="newBtn" class="link small admin-only">New session</button> <span id="lock"></span></div>
 
   <script src="/instructor.js"></script>
   <script>
@@ -49,6 +49,7 @@
       refresh();
     });
 
+    adminGate(document.getElementById('lock'));
     refresh();
   </script>
 </body>

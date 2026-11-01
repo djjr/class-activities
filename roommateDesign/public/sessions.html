@@ -9,11 +9,13 @@
 <body>
   <main class="wrap">
     <h1>Saved sessions</h1>
+    <p><span id="lock"></span></p>
     <div id="list" class="card"><p class="muted">Loading…</p></div>
   </main>
   <script src="/instructor.js"></script>
   <script>
     (async () => {
+      await adminGate(document.getElementById('lock'));
       const box = document.getElementById('list');
       try {
         const list = await iapi('saved');
@@ -26,7 +28,7 @@
           view.href = `/i/view?id=${encodeURIComponent(s.id)}&key=${encodeURIComponent(KEY)}`;
           view.textContent = 'View';
           const download = document.createElement('a');
-          download.href = `/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}`;
+          download.href = `/api/i/saved/${encodeURIComponent(s.id)}?key=${encodeURIComponent(KEY)}&admin=${encodeURIComponent(adminKey())}`;
           download.textContent = 'Download';
           row.append(label, ' · ', view, ' · ', download, ` · ${s.nSubmitted} submitted · saved ${new Date(s.savedAt).toLocaleString()}`);
           return row;

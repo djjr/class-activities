@@ -43,7 +43,7 @@ Both instructor slides always point at the *current* session, so the slide URLs 
 
 ## API
 
-All `/api/i/*` routes require `key` (query param or header) to match `INSTRUCTOR_KEY`.
+All `/api/i/*` routes require the view key (`key` query param or `X-Instructor-Key` header). Every `POST /api/i/*` and `GET /api/i/saved*` also requires the admin key (`X-Admin-Key` header, or `admin=` for EventSource and download links). `GET /api/i/whoami` → `{admin}`. See **Keys**.
 
 | Method & path | Purpose |
 |---|---|
@@ -85,7 +85,7 @@ After every change, the server recomputes the aggregate, broadcasts it over SSE,
 ## Embedding & security
 
 - Responses set `Content-Security-Policy: frame-ancestors 'self' https://slides.com https://*.slides.com`, and the app does not send `X-Frame-Options`.
-- `INSTRUCTOR_KEY` appears in the iframe URLs. **Anyone who can view the deck's source can see it**, so keep the deck private or unlisted, and rotate the key if it leaks.
+- **Keys (2026-11-01).** The deck is public, so the key in its iframe URLs can't be secret. `INSTRUCTOR_KEY` is the **view key**: join slide plus anonymous results. The instructor stream sends **author names only to admin clients**. `ADMIN_KEY` is the **control key**: Close/Reopen, Save, New session, saved sessions, and Show names. It is typed into the page once (🔒), kept in `localStorage`, and never put in a deck URL. Elements with class `admin-only` show only when `body.is-admin`. If `ADMIN_KEY` is unset it falls back to `INSTRUCTOR_KEY`. marketExchange uses the same scheme.
 - Student input is length-limited and validated by `sim.validate()`. Names are rendered as text, never as HTML.
 
 ## Project layout
@@ -107,7 +107,7 @@ roommateDesign/
 
 - Railway's Nixpacks builder auto-detects Node; the service runs `npm start`.
 - Add a volume mounted at `/data` and set `DATA_DIR=/data`.
-- Environment variables: `INSTRUCTOR_KEY`, `DATA_DIR`, and `PUBLIC_URL` (the base URL encoded in the QR code). `PORT` is provided by Railway.
+- Environment variables: `INSTRUCTOR_KEY` (view), `ADMIN_KEY` (control), `DATA_DIR`, and `PUBLIC_URL` (the base URL encoded in the QR code). `PORT` is provided by Railway.
 - Health check: `GET /healthz`.
 - Run exactly one replica, because state is held in memory.
 
@@ -115,5 +115,5 @@ roommateDesign/
 
 1. **After Close:** every student can see the results, including those who never submitted.
 2. **Resubmitting:** allowed until close. The new submission overwrites the old one.
-3. **Names in the aggregate:** on the instructor view, failure-mode writeups can show their author (nickname, else name) behind a **Show names** toggle that is off by default. That lets the instructor say "Jason, tell us about that one." Students only ever see anonymous text. Names are never saved.
+3. **Names in the aggregate:** on the instructor view, failure-mode writeups can show their author (nickname, else name) behind a **Show names** toggle that is off by default. That lets the instructor say "Jason, tell us about that one." Students only ever see anonymous text. Names are never saved. Since 2026-11-01 the toggle (and the names themselves) require the admin key, because the view key is in the public deck.
 4. **No "extremes" feature.** The instructor explores by tapping virtues instead (see SIMULATION.md).

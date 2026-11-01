@@ -30,7 +30,7 @@ Code map:
 - **Names are never written to disk.** Saves are anonymized: virtue sets plus all failure-mode/workaround text. The instructor can show names live via the "Show names" toggle; students always see anonymous entries.
 - Instructor slide URLs always target the *current* session, so deck URLs never change. Loading a page never creates a session unless none exists.
 - No blocking `alert`/`confirm` (they freeze slide iframes); use two-click confirm buttons.
-- **Never commit `INSTRUCTOR_KEY`**, since the repo is public. It lives only in Railway variables.
+- **Two keys, because the deck is public** (2026-11-01). `INSTRUCTOR_KEY` is the *view* key and goes in deck iframe URLs: display only, no names. `ADMIN_KEY` is the *control* key: controls, names, saved sessions. It is typed once into the page via the 🔒 control and kept in localStorage, sent as `X-Admin-Key` (or `admin=` for EventSource/downloads). It falls back to `INSTRUCTOR_KEY` if unset. Same scheme in every activity. **Never commit either key**; both live only in Railway variables.
 - The frame-ancestors CSP allows `slides.com`. Keep it if you touch headers.
 
 ## Run and test
@@ -50,8 +50,8 @@ Visual checks need the Claude in Chrome extension, which was not connected in th
 ## Deploy (Railway)
 
 - Production: https://classroom-simulations-production.up.railway.app
-- Deploys automatically on push to `main`, about 30 s. Railway's "Source" settings show "Could not load branches"; it's only a display glitch, and pushes still deploy.
-- Service root directory is `/roommateDesign`. Volume at `/data` with `DATA_DIR=/data`. Variable `INSTRUCTOR_KEY`. One replica, because state is in memory.
+- Deploys automatically on push to `main`, about 30 s. **Set Watch Paths** (`/roommateDesign/**`) so pushes to other activity folders don't redeploy this service. Railway's "Source" settings show "Could not load branches"; it's only a display glitch, and pushes still deploy.
+- Service root directory is `/roommateDesign`. Volume at `/data` with `DATA_DIR=/data`. Variables `INSTRUCTOR_KEY` and `ADMIN_KEY`. One replica, because state is in memory.
 - Verify a deploy: `curl …/version` returns `{"commit":"<sha7>"}`. Compare with `git log -1 --format=%h`.
 - Test page: `…/test/fake-class.html?key=<KEY>` (the `.html` is required).
 

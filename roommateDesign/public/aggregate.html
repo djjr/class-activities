@@ -12,9 +12,10 @@
       <h1 style="margin:0">Our robot roommates</h1>
       <span class="spacer"></span>
       <span id="count" class="count"></span>
-      <label class="toggle"><input id="names" type="checkbox"> Show names</label>
-      <button id="closeBtn">Close submissions</button>
-      <button id="saveBtn">Save</button>
+      <label class="toggle admin-only"><input id="names" type="checkbox"> Show names</label>
+      <button id="closeBtn" class="admin-only">Close submissions</button>
+      <button id="saveBtn" class="admin-only">Save</button>
+      <span id="lock"></span>
       <span id="msg" class="small muted"></span>
     </div>
     <div id="root"></div>
@@ -37,6 +38,7 @@
       } catch (e) {
         return flash(e.message);
       }
+      await adminGate($('lock'));
       // Virtue list comes with the aggregate; build the view on first message.
       istream(msg => {
         if (!msg.session) return;
@@ -44,7 +46,7 @@
         $('closeBtn').textContent = closed ? 'Reopen submissions' : 'Close submissions';
         $('count').textContent = `${msg.session.code} · ${msg.counts.joined} joined · ${msg.counts.submitted} submitted${closed ? ' · closed' : ''}`;
         if (!results) results = Results.create($('root'), { virtues: msg.virtues, instructor: true });
-        results.update(msg.aggregate, { showNames: $('names').checked });
+        results.update(msg.aggregate, { showNames: msg.admin && $('names').checked });
       });
     }
 

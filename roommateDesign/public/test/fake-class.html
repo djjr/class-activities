@@ -70,6 +70,7 @@
       try {
         await FakeClass.run({
           key: KEY,
+          admin: adminKey(),
           n: Number($('n').value) || 25,
           delay: Number($('delay').value) || 0,
           newSession: $('fresh').checked,
@@ -84,6 +85,12 @@
     });
 
     if (!KEY) log('No key in the URL. Add ?key=<INSTRUCTOR_KEY>.');
+    // "Start a new session first" needs the admin key.
+    const lockSpot = document.createElement('p');
+    lockSpot.className = 'small';
+    lockSpot.innerHTML = 'Admin key (needed for a new session): <span id="lock"></span>';
+    $('log').closest('.card').before(lockSpot);
+    adminGate(document.getElementById('lock'));
   </script>
 </body>
 </html>

@@ -9,6 +9,8 @@
 //   --delay 0       ms between students; e.g. 1500 to watch results arrive live
 //   --new           start a fresh session first (replaces the current one)
 //   --code ABCD     use this session code instead of asking the server (no key needed)
+//   --admin KEY     admin key, needed for --new (defaults to --key, which
+//                   works when ADMIN_KEY is unset, e.g. locally)
 
 const FakeClass = require('../public/test/fake-class.js');
 
@@ -23,6 +25,7 @@ function opt(name, fallback) {
 FakeClass.run({
   base: String(opt('url', 'http://localhost:3000')).replace(/\/$/, ''),
   key: opt('key', process.env.INSTRUCTOR_KEY || 'dev'),
+  admin: opt('admin', process.env.ADMIN_KEY || opt('key', process.env.INSTRUCTOR_KEY || 'dev')),
   n: Number(opt('n', 25)),
   delay: Number(opt('delay', 0)),
   newSession: !!opt('new', false),

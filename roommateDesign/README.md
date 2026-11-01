@@ -51,7 +51,8 @@ Compare it with `git log -1 --format=%h` after a push. A push to `main` that cha
 1. New Project → Deploy from GitHub repo → `djjr/class-activities`.
 2. Service **Settings → Root Directory**: `/roommateDesign`. Optionally set **Watch Paths** to `/roommateDesign/**`.
 3. **Variables**:
-   - `INSTRUCTOR_KEY`: a long random string. This repo is public, so never commit the key.
+   - `INSTRUCTOR_KEY`: the **view key**, a long random string. It goes in the deck's iframe URLs.
+   - `ADMIN_KEY`: the **control key**, a different long random string. Never put it in a URL or commit it. (If unset, it falls back to `INSTRUCTOR_KEY`, the old single-key behavior.)
    - `DATA_DIR`: `/data`
    - `PUBLIC_URL`: optional. By default the app uses the host the request arrived on.
 4. **Volume**: add one mounted at `/data`. It holds the live backup and saved sessions.
@@ -65,4 +66,4 @@ Add an iframe element to a slide with:
 - Welcome slide: `https://<app>.up.railway.app/i/welcome?key=<INSTRUCTOR_KEY>`
 - Results slide: `https://<app>.up.railway.app/i/aggregate?key=<INSTRUCTOR_KEY>`
 
-Anyone who can see the deck's source can see the key, so keep the deck private or unlisted.
+The deck can be public. The `key` in these URLs is the view key: anyone can see the join slide and anonymous results, but not the controls (Close, Save, New session), author names, or saved sessions. To use those, click the 🔒 on the results or welcome slide on your own laptop and type `ADMIN_KEY` once. Your browser remembers it (including inside the slides.com iframe), and 🔓 Lock forgets it. The CLI fake class takes `--admin KEY` for `--new`.
