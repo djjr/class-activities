@@ -17,6 +17,7 @@ INSTRUCTOR_KEY=dev npm run dev
 
 ## Running a session
 
+0. Before class, click **New session** (twice) on the room view or the welcome slide. The server keeps the last session across restarts (`data/live.json`), so it won't reset by itself.
 1. Students join from the welcome slide with a nickname.
 2. On the room view, click a phase (**Chairs**, **Offices: random**, **Offices: like me**) twice to start it. This generates a fresh economy for everyone joined right now. Anyone who joins later waits for the next phase.
 3. Tick **Classifieds** and/or **Money** if you want them, then **Open round**. Students trade until you click **Close round** (twice).

@@ -37,7 +37,7 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 | URL | Audience | Behavior |
 |---|---|---|
 | `/i/welcome?key=K` | Slide iframe | QR code, join code, "N joined". **New session** button. Same as roommateDesign. |
-| `/i/room?key=K` | Slide iframe | Welfare chart, trade ticker, offices map, and controls (Start phase, Open round with Classifieds/Money, Close round, Save). |
+| `/i/room?key=K` | Slide iframe | Welfare chart, trade ticker, offices map, and controls (Start phase, Open round with Classifieds/Money, Close round, Save, New session). |
 | `/i/sessions?key=K` | Instructor browser | Saved sessions with JSON download. |
 | `/s/ABCD` | Students | Nickname → wait → chair card or office view → Trade (names / classifieds / map) → offers. |
 | `/test/fake-class.html?key=K` | Instructor browser | Bot students that join and trade only when both gain (see Testing). |

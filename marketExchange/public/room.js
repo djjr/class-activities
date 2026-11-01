@@ -145,3 +145,5 @@ document.querySelectorAll('[data-phase]').forEach(btn => {
 $('openBtn').onclick = run(() => iapi('round/open', 'POST', { classifieds: $('optClassifieds').checked, money: $('optMoney').checked }));
 confirmButton($('closeBtn'), 'Click again to close', run(() => iapi('round/close', 'POST')));
 $('saveBtn').onclick = run(async () => { const r = await iapi('save', 'POST'); say(`Saved ${new Date(r.savedAt).toLocaleTimeString()}`); });
+// Starts a fresh session (new code; everyone rejoins). Save first if you want a record.
+confirmButton($('newBtn'), 'Click again: new session', run(async () => { await iapi('new', 'POST'); say('New session started'); }));
