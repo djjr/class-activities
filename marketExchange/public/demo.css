@@ -1,0 +1,86 @@
+/* Slide demo. Sized to fill an iframe of any shape (roughly square when
+   two panes sit side by side on a 16:9 slide). */
+.demo {
+  position: relative; height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 14px; cursor: pointer; user-select: none;
+}
+.demo-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.demo-title { font-size: clamp(18px, 3.4vw, 28px); font-weight: 800; }
+.demo-status { font-size: clamp(11px, 1.7vw, 14px); color: var(--muted); }
+.demo-caption {
+  min-height: 3.4em; font-size: clamp(13px, 2.2vw, 18px); line-height: 1.35;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px;
+}
+.demo-caption .neg, .demo-summary .neg, .demo-status .neg { color: #b3261e; }
+.demo-caption .pos { color: #2e7d4f; }
+
+.demo-board {
+  position: relative; flex: 1.35; min-height: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 8px;
+}
+.d-slot {
+  position: relative; border-radius: 10px; background: #ece9e1;
+  display: flex; flex-direction: column; justify-content: space-between; padding: 4px 8px;
+  transition: box-shadow .2s, transform .2s;
+}
+.d-name { font-weight: 800; font-size: clamp(12px, 2vw, 17px); text-align: center; }
+.d-slot .d-score {
+  position: absolute; right: 6px; top: 4px; z-index: 3;
+  font-size: clamp(10px, 1.6vw, 13px); font-weight: 700; color: var(--muted);
+}
+.d-item {
+  position: absolute; border-radius: 10px; z-index: 2;
+  display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 4px 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+.d-item.ink-dark { color: #14243a; --off: rgba(20,36,58,.15); --on: #14243a; }
+.d-item.ink-light { color: #fff; --off: rgba(255,255,255,.25); --on: #fff; }
+.d-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: clamp(8px, 1.3vw, 11px); font-weight: 700; }
+.d-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 58%; }
+.d-bar i { display: block; height: clamp(5px, 1.1vh, 9px); border-radius: 2px; background: var(--off); }
+.d-bar i.on { background: var(--on); }
+.d-type { font-size: clamp(20px, 4vw, 34px); font-weight: 800; text-align: center; line-height: 1; }
+.d-pname { font-weight: 800; text-align: center; font-size: clamp(11px, 1.9vw, 16px); }
+.d-wants { text-align: center; font-size: clamp(9px, 1.4vw, 12px); }
+.d-wants .type-chip { min-width: 18px; height: 18px; font-size: 11px; box-shadow: 0 0 0 1px rgba(0,0,0,.2); }
+.d-item .d-score { position: absolute; right: 6px; top: 4px; font-size: clamp(10px, 1.5vw, 12px); font-weight: 700; opacity: .85; }
+
+/* Chairs highlight the person's slot: the ring sits outside the slot, so it
+   frames the chair card on top without covering it (no z-index change). */
+.d-slot.meeting { box-shadow: 0 0 0 4px #1d1d1f; }
+.d-item.meeting { box-shadow: 0 0 0 4px #1d1d1f; z-index: 4; }
+.d-slot.nodeal, .d-item.nodeal { box-shadow: 0 0 0 4px #b3261e; }
+.d-badge {
+  position: absolute; left: 50%; top: -6px; transform: translate(-50%, -50%); z-index: 6;
+  padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: clamp(12px, 2vw, 16px);
+  color: #fff; animation: badge 0.35s ease-out;
+}
+.d-badge.pos { background: #2e7d4f; }
+.d-badge.neg { background: #b3261e; }
+@keyframes badge { from { transform: translate(-50%, 0) scale(.6); opacity: 0; } }
+
+.demo-chart { flex: 1; min-height: 80px; width: 100%; }
+.demo-chart .bench { stroke: #2e7d4f; stroke-dasharray: 6 5; stroke-width: 2; }
+.demo-chart .bench-label { font-size: 12px; fill: #2e7d4f; font-weight: 700; }
+.demo-chart .start-line { stroke: #cfcac0; stroke-width: 1; }
+.demo-chart .tick { font-size: 11px; fill: var(--muted); }
+.demo-chart .line { fill: none; stroke: var(--accent); stroke-width: 3; }
+.demo-chart .pt { fill: var(--accent); }
+
+.demo-caption.final { border: 2px solid var(--accent); }
+.demo-caption .hint { font-size: 12px; color: var(--muted); }
+/* Summary box is only used when captions are off; otherwise the summary
+   replaces the caption so it doesn't cover the end of the chart. */
+.demo-summary {
+  position: absolute; left: 50%; top: 56px; transform: translateX(-50%); z-index: 8;
+  background: var(--surface); border: 2px solid var(--accent); border-radius: 12px; padding: 10px 16px;
+  font-size: clamp(13px, 2.1vw, 17px); text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  width: max-content; max-width: 92%;
+}
+.demo-summary .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.demo-overlay {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9;
+  border: 0; border-radius: 999px; padding: 14px 24px; cursor: pointer;
+  background: rgba(29,29,31,.85); color: #fff; font: inherit; font-weight: 700; font-size: clamp(14px, 2.4vw, 20px);
+}

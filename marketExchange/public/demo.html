@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange — Demo</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/demo.css">
+</head>
+<body class="slide">
+  <!-- Slide demo. No server state: the whole run is computed from the URL.
+       /demo?phase=chairs&classifieds=1&money=0&seed=17&speed=1&captions=1
+       Two panes with the same phase+seed start from the same economy. -->
+  <div class="demo" id="demo">
+    <header class="demo-head">
+      <div class="demo-title" id="title"></div>
+      <div class="demo-status" id="status"></div>
+    </header>
+    <div class="demo-caption" id="caption"></div>
+    <div class="demo-board" id="board"></div>
+    <svg class="demo-chart" id="chart" role="img" aria-label="Room welfare by meeting"></svg>
+    <div class="demo-summary" id="summary" hidden></div>
+    <button class="demo-overlay" id="overlay">▶ Click to start</button>
+  </div>
+  <script src="/sim.js"></script>
+  <script src="/offices.js"></script>
+  <script src="/demo-plan.js"></script>
+  <script src="/demo.js"></script>
+</body>
+</html>

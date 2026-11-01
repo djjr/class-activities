@@ -46,10 +46,12 @@ function shuffle(rand, arr) {
 const randVec = rand => DIMS.map(() => randInt(rand, 1, LEVELS));
 
 // ---------------------------------------------------------------- economies
-function newEconomy(type, n, rand) {
+// opts.grid = { rows, cols } overrides the headcount-based office grid
+// (the slide demo uses 2 x 4 for 8 people, with no phantoms).
+function newEconomy(type, n, rand, opts = {}) {
   if (!PHASE_TYPES.includes(type)) throw new Error(`Unknown phase type ${type}`);
   if (n < 2) throw new Error('Need at least 2 students');
-  return type === 'chairs' ? newChairs(n, rand) : newOffices(type, n, rand);
+  return type === 'chairs' ? newChairs(n, rand) : newOffices(type, n, rand, opts.grid);
 }
 
 function newChairs(n, rand) {
@@ -66,8 +68,9 @@ function gridFor(n) {
   throw new Error(`Too many students for an office grid (${n})`);
 }
 
-function newOffices(type, n, rand) {
-  const { rows, cols } = gridFor(n);
+function newOffices(type, n, rand, grid) {
+  const { rows, cols } = grid || gridFor(n);
+  if (rows * cols < n) throw new Error('Grid too small');
   const types = Array.from({ length: n }, () => randInt(rand, 1, LEVELS));
   const wants = type === 'offices-like-me'
     ? types.slice()

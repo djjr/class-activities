@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Exchange — Demo pair preview</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #f7f6f2; font-family: system-ui, sans-serif; }
+    .bar { padding: 6px 10px; font-size: 13px; }
+    .bar a { margin-right: 10px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: calc(100% - 34px); padding: 0 10px 10px; box-sizing: border-box; }
+    iframe { width: 100%; height: 100%; border: 1px solid #ddd; border-radius: 8px; background: #f7f6f2; }
+  </style>
+</head>
+<body>
+  <!-- Preview of a two-pane demo slide. Query string is passed to both panes;
+       ?right= sets the right pane's institutions (classifieds | money | both). -->
+  <div class="bar" id="bar"></div>
+  <div class="pair">
+    <iframe id="left" title="Plain market"></iframe>
+    <iframe id="right" title="With an institution"></iframe>
+  </div>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const right = q.get('right') || 'classifieds';
+    q.delete('right');
+    const base = q.toString();
+    const extra = { classifieds: 'classifieds=1', money: 'money=1', both: 'classifieds=1&money=1' }[right];
+    document.getElementById('left').src = `/demo?${base}`;
+    document.getElementById('right').src = `/demo?${base}&${extra}`;
+    const phase = q.get('phase') || 'chairs';
+    document.getElementById('bar').innerHTML = ['chairs', 'offices-random', 'offices-like-me'].flatMap(p =>
+      ['classifieds', 'money', 'both'].map(r => `<a href="?phase=${p}&right=${r}">${p} · plain vs ${r}</a>`)).join(' ');
+  </script>
+</body>
+</html>

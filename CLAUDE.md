@@ -25,7 +25,7 @@ Code map:
 
 ### marketExchange: "Market Exchange"
 
-Students trade chairs (pure exchange), then offices (neighbors create externalities: one phase with random preferences, one with "like me"), while the room tracks aggregate welfare per round. Each round, the instructor toggles Classifieds (low search cost) and Money (side payments). Specs and decisions: `marketExchange/SIMULATION.md` and `ARCHITECTURE.md` (includes a code map). `npm run check` runs headless checks; `npm run fake -- --drive` runs a whole bot session. Lives on branch `marketExchange-spec` until Dan approves a merge; needs its own Railway service (root `/marketExchange`) and Watch Paths on both services.
+Students trade chairs (pure exchange), then offices (neighbors create externalities: one phase with random preferences, one with "like me"), while the room tracks aggregate welfare per round. Each round, the instructor toggles Classifieds (low search cost) and Money (side payments). Specs and decisions: `marketExchange/SIMULATION.md` and `ARCHITECTURE.md` (includes a code map). `npm run check` runs headless checks; `npm run fake -- --drive` runs a whole bot session. `/demo` is a self-contained animated slide demo (8 bots, seeded; two panes side by side compare institutions). Lives on branch `marketExchange-spec` until Dan approves a merge; needs its own Railway service (root `/marketExchange`) and Watch Paths on both services.
 
 ## Conventions and decisions (settled; don't relitigate)
 

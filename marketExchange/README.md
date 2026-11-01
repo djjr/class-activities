@@ -23,6 +23,23 @@ INSTRUCTOR_KEY=dev npm run dev
 3. Tick **Classifieds** and/or **Money** if you want them, then **Open round**. Students trade until you click **Close round** (twice).
 4. Repeat rounds, then start the next phase. **Save** writes an anonymized record (economies, trades, welfare; no names).
 
+## Slide demo (before playing)
+
+A self-contained animation of 8 bot traders for explaining the game. No session or server state is involved: the whole run is computed from the URL, so it can't touch a live class.
+
+```
+/demo?phase=chairs                         plain market
+/demo?phase=chairs&classifieds=1           same economy, with classifieds
+/demo?phase=chairs&money=1                 … with side payments
+/demo?phase=chairs&classifieds=1&money=1   … both
+```
+
+- Put two iframes side by side on a slide, **same `phase` (and `seed`)**, differing only in institutions. Both panes start from the same people, chairs, and best-possible line, and share a chart scale, so the gap between them is the institution's effect.
+- Click either pane to start; the other starts with it (and pausing works the same way). Space pauses or resumes, → steps once paused, R replays. It stops on a summary.
+- Options: `phase` (`chairs`, `offices-random`, `offices-like-me`), `seed`, `speed` (1 = about 3.5 s per meeting), `meetings` (24), `captions=0` (you narrate), `title`, `group` (to keep two demo pairs on different slides from syncing with each other).
+- Default seeds tell each phase's story (chosen with `node scripts/demo-seeds.js`). Chairs (17): plain 55% · classifieds 76% · money 94% · both 100%. Offices random (156): plain ends *below* the start; classifieds 24% with 9 harmful swaps. Offices like me (39): plain 53% after 24 meetings; classifieds sorts the room in 3 meetings, 93%.
+- Preview two panes at `/test/demo-pair.html?phase=chairs&right=classifieds` (`right` = `classifieds`, `money`, or `both`).
+
 ## Fake class
 
 Bots join the current session and trade whenever a round is open.

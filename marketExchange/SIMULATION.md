@@ -138,6 +138,15 @@ One page, used both on the slide and for control:
 - **Counts:** joined, in this phase, trades this round.
 - **Show names** toggle (off by default), as in roommateDesign.
 
+## Slide demo (decided 2026-11-01)
+
+To explain the game before playing, a slide shows two `/demo` panes side by side: **same phase and economy, different institutions** (plain vs Classifieds, Money, or both). Holding the phase fixed makes the comparison about institutions, which is the course's question about markets as an alignment mechanism. The chairs-versus-offices contrast (when markets fail) is a separate slide if wanted.
+
+- 8 people, 4 wide × 2 tall for both chairs and offices.
+- Each meeting is narrated in three beats: who meets and each side's own gain; the outcome (swap, payment, or no deal; in offices, the neighbors' change and the room's); then a short pause.
+- Plain market: random pairs meet. Classifieds: someone goes down their list, best first, until a partner also gains. Money: the winner pays the loser enough to accept, splitting the surplus in whole tokens.
+- Captions on by default (`captions=0` to narrate yourself). Starts on click; panes stay in step; stops on a summary.
+
 ## Saved snapshot (`sim.snapshot()`, no names)
 
 Participants are saved as shuffled anonymous indices.

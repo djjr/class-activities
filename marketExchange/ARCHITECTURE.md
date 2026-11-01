@@ -40,6 +40,7 @@ Slide iframe ──► /i/room ─────┤   (projected view + controls)
 | `/i/room?key=K` | Slide iframe | Welfare chart, trade ticker, offices map, and controls (Start phase, Open round with Classifieds/Money, Close round, Save, New session). |
 | `/i/sessions?key=K` | Instructor browser | Saved sessions with JSON download. |
 | `/s/ABCD` | Students | Nickname → wait → chair card or office view → Trade (names / classifieds / map) → offers. |
+| `/demo?phase=…&classifieds=…&money=…` | Slide iframe | Self-contained animated demo with 8 bots; no key, no server state. See README "Slide demo" |
 | `/test/fake-class.html?key=K` | Instructor browser | Bot students that join and trade only when both gain (see Testing). |
 
 ## API
@@ -120,6 +121,7 @@ Still no test suite, matching repo practice, but:
 - `public/student.*`: join → wait → chair card or office map → trade sheet (names / classifieds) → preview → offer; incoming offers float over the card.
 - `public/room.*`: projected view and controls. Hand-rolled SVG chart sized to its box.
 - `public/card.js`, `public/offices.js`: chair card and office map, shared.
+- `public/demo-plan.js`: computes a whole slide demo (economy and events) from a seed; works in Node and the browser. `public/demo.*` animates it. `scripts/demo-seeds.js` searches for seeds that tell each phase's story.
 - `public/test/fake-class.*`, `scripts/fake-class.js`: bots (shared logic).
 - `scripts/check-sim.js`, `scripts/check-market.js`: headless checks (`npm run check`).
 
