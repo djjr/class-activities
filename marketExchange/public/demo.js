@@ -38,15 +38,32 @@ $('title').textContent = V.title ||
   (OPTS.classifieds && OPTS.money ? 'Classifieds + money' : OPTS.classifieds ? 'With classifieds' : OPTS.money ? 'With money' : 'Plain market');
 if (!CAPTIONS) $('caption').hidden = true;
 
+// One-line key under the board (legend=0 hides it).
+const coinKey = OPTS.money ? ' · <span class="coin"></span>tokens' : '';
+$('legend').innerHTML = !V.legend ? '' : offices
+  ? `Each card is a person · color and big number = their type (1 quiet … 5 loud) · <b>wants</b> = the neighbor type they'd like · top number = their score (of 64)${coinKey}`
+  : `Each tile is a person; the card is the chair they hold · <i class="k-on"></i> = the chair's level (1–5) · <i class="k-want"></i> = the level this person wants · top number = how well it fits (of 64)${coinKey}`;
+$('legend').hidden = !V.legend;
+
 // ---------------------------------------------------------------- board
 const board = $('board');
 const slots = [], items = [];
 const SHADES = ['#eef3f8', '#c9dbee', '#90b4da', '#4f80b8', '#1f4a82'];
 
-function bars(v) {
+// One attribute row: filled blocks up to the chair's level. `want` (the
+// holder's target level) gets a ring, so you can see how far off the chair is.
+function bars(v, want) {
   let h = '<span class="d-bar">';
-  for (let k = 1; k <= 5; k++) h += `<i class="${k <= v ? 'on' : ''}"></i>`;
+  for (let k = 1; k <= 5; k++) h += `<i class="${k <= v ? 'on' : ''}${k === want ? ' want' : ''}"></i>`;
   return h + '</span>';
+}
+
+// Chairs: redraw a chair card's rows with its current holder's target rings.
+// Called whenever holdings change, so after a swap the rings switch to the
+// new holder's wants (and you can see the chair now fits them better).
+function drawChair(i, holder) {
+  const c = E.chairs[i], t = E.targets[holder];
+  items[i].innerHTML = MarketSim.DIMS.map((d, k) => `<div class="d-row"><span>${d.label}</span>${bars(c[k], t[k])}</div>`).join('');
 }
 
 function buildBoard() {
@@ -65,7 +82,7 @@ function buildBoard() {
       const c = E.chairs[i];   // item i = chair i
       it.style.background = SHADES[c[0] - 1];
       it.classList.add(c[0] >= 4 ? 'ink-light' : 'ink-dark');
-      it.innerHTML = MarketSim.DIMS.map((d, k) => `<div class="d-row"><span>${d.label}</span>${bars(c[k])}</div>`).join('');
+      // rows (with target rings) are drawn by drawChair once holdings are known
     } else {
       const t = E.types[i];    // item i = person i
       it.style.background = Offices.TYPE_COLORS[t - 1];
@@ -97,6 +114,7 @@ function place(holdings, animate) {
 
 function showScores(holdings) {
   const sc = MarketSim.scores(E, holdings);
+  if (!offices) items.forEach((_, i) => drawChair(i, holdings.indexOf(i)));
   if (offices) items.forEach((it, i) => { it.querySelector('[data-score]').textContent = fmt(sc[i]); });
   else slots.forEach((s, i) => { s.querySelector('[data-score]').textContent = fmt(sc[i]); });
 }
@@ -198,10 +216,10 @@ function reset() {
   $('overlay').textContent = '▶ Click to start';
   items.forEach(it => it.classList.remove('meeting'));
   slots.forEach(s => s.classList.remove('meeting'));
-  place(holdings, false); showScores(holdings); showTokens(new Array(8).fill(MarketSim.START_TOKENS)); drawChart(0); status();
   setCaption(offices
     ? `Eight people, eight offices. Each wants neighbors of a certain type. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? MONEY_INTRO : ''}`
     : `Eight people, eight chairs. Each wants a different chair. ${OPTS.classifieds ? 'Classifieds list who would help you.' : 'People meet at random.'}${OPTS.money ? MONEY_INTRO : ''}`);
+  place(holdings, false); showScores(holdings); showTokens(new Array(8).fill(MarketSim.START_TOKENS)); drawChart(0); status();
 }
 
 // One event in three beats: meet (highlight + each side's gain), outcome
@@ -287,6 +305,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && !playing && started) { clearTimeout(timer); step(); }
 });
 window.addEventListener('resize', () => { place(holdings, false); drawChart(k); });
+// The board moves when the caption above it grows (e.g. the long money intro),
+// so re-place the cards whenever its size changes, not just on window resize.
+if ('ResizeObserver' in window) new ResizeObserver(() => { place(holdings, false); drawChart(k); }).observe(board);
 
 buildBoard();
 // Wait a frame so the grid has its size before placing items.

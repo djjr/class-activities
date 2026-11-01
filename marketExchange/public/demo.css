@@ -31,14 +31,14 @@
 }
 .d-item {
   position: absolute; border-radius: 10px; z-index: 2;
-  display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 4px 8px;
+  display: flex; flex-direction: column; justify-content: center; gap: 5px; padding: 4px 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,.15);
 }
 .d-item.ink-dark { color: #14243a; --off: rgba(20,36,58,.15); --on: #14243a; }
 .d-item.ink-light { color: #fff; --off: rgba(255,255,255,.25); --on: #fff; }
-.d-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: clamp(8px, 1.3vw, 11px); font-weight: 700; }
-.d-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 58%; }
-.d-bar i { display: block; height: clamp(5px, 1.1vh, 9px); border-radius: 2px; background: var(--off); }
+.d-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: clamp(9px, 1.5vw, 13px); font-weight: 700; }
+.d-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; width: 60%; }
+.d-bar i { display: block; height: clamp(7px, 1.9vh, 14px); border-radius: 3px; background: var(--off); }
 .d-bar i.on { background: var(--on); }
 .d-type { font-size: clamp(20px, 4vw, 34px); font-weight: 800; text-align: center; line-height: 1; }
 .d-pname { font-weight: 800; text-align: center; font-size: clamp(11px, 1.9vw, 16px); }
@@ -123,3 +123,12 @@ body.setup-page { overflow: auto; }
 .url-row { display: flex; gap: 8px; align-items: center; margin: 4px 0 10px; }
 .url-row code { flex: 1; word-break: break-all; font-size: 14px; padding: 6px 8px; }
 #run { display: inline-block; text-decoration: none; }
+
+/* Target rings (chairs): the block at the level this person wants. Pink so
+   it can't be confused with the chair's own blocks or the gain badges. */
+.d-bar i.want { box-shadow: 0 0 0 2.5px #e8336d; }
+.d-item.ink-light .d-bar i.want { box-shadow: 0 0 0 2px #ff7aa8; }
+.demo-legend { font-size: clamp(10px, 1.5vw, 13px); color: var(--muted); line-height: 1.4; }
+.demo-legend i { display: inline-block; width: 12px; height: 8px; border-radius: 2px; vertical-align: 0; margin: 0 2px; }
+.demo-legend .k-on { background: #14243a; }
+.demo-legend .k-want { background: #c9dbee; box-shadow: 0 0 0 2px #e8336d; }

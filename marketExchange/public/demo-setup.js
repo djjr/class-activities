@@ -20,6 +20,7 @@
     classifieds: { kind: 'bool', dflt: false },
     money: { kind: 'bool', dflt: false },
     captions: { kind: 'bool', dflt: true },
+    legend: { kind: 'bool', dflt: true },
     speed: { kind: 'num', min: 0.25, max: 10, dflt: 1 },
     meetings: { kind: 'int', min: 4, max: 60, dflt: 24 },
     seed: { kind: 'int', min: 1, max: 999999999, dflt: null },   // null = the phase's default
@@ -97,6 +98,7 @@
     if (v.classifieds) q.set('classifieds', '1');
     if (v.money) q.set('money', '1');
     if (!v.captions) q.set('captions', '0');
+    if (!v.legend) q.set('legend', '0');
     if (v.speed !== 1) q.set('speed', String(v.speed));
     if (v.meetings !== 24) q.set('meetings', String(v.meetings));
     if (v.seed !== DEFAULT_SEED[v.phase]) q.set('seed', String(v.seed));
@@ -132,6 +134,7 @@
               ${SPEEDS.includes(values.speed) ? '' : `<option value="${values.speed}" selected>${values.speed}×</option>`}</select></label>
             <label>Meetings <input type="number" name="meetings" min="4" max="60" value="${values.meetings}"></label>
             <label class="opt"><input type="checkbox" name="captions" ${values.captions ? 'checked' : ''}> Captions (off if you'll narrate)</label>
+            <label class="opt"><input type="checkbox" name="legend" ${values.legend ? 'checked' : ''}> Key under the board (what the colors and blocks mean)</label>
           </fieldset>
           <fieldset class="grid2"><legend>Advanced</legend>
             <label>Seed <input type="number" name="seed" min="1" value="${values.seed}"> <span class="muted small">same seed = same economy</span></label>
@@ -152,7 +155,7 @@
       const f = new FormData(form), phase = f.get('phase');
       const num = (k, d) => { const x = Number(f.get(k)); return Number.isFinite(x) && x > 0 ? x : d; };
       return {
-        phase, classifieds: f.has('classifieds'), money: f.has('money'), captions: f.has('captions'),
+        phase, classifieds: f.has('classifieds'), money: f.has('money'), captions: f.has('captions'), legend: f.has('legend'),
         speed: num('speed', 1), meetings: Math.min(60, Math.max(4, Math.round(num('meetings', 24)))),
         seed: Math.round(num('seed', DEFAULT_SEED[phase])),
         title: (f.get('title') || '').trim(), group: (f.get('group') || '').trim(),
