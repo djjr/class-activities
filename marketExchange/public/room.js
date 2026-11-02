@@ -51,8 +51,12 @@ function render() {
 
   // KPIs
   $('kpiWelfare').textContent = fmt(p.welfare);
-  $('kpiShare').textContent = p.gainShare == null ? '–' : `${Math.round(100 * p.gainShare)}%`;
-  $('kpiShareLabel').textContent = p.benchmark.kind === 'optimum' ? 'of possible gain' : 'of gain to best found';
+  // Below the starting welfare, a negative percentage reads badly; say it plainly (as the demo does).
+  const below = p.welfare < p.startWelfare - 1e-9;
+  $('kpiShare').textContent = p.gainShare == null ? '–' : below ? 'below start' : `${Math.round(100 * p.gainShare)}%`;
+  $('kpiShare').classList.toggle('warn-text', below);
+  $('kpiShareLabel').textContent = below ? 'room is worse off than when the phase began'
+    : p.benchmark.kind === 'optimum' ? 'of possible gain' : 'of gain to best found';
   const offices = p.type !== 'chairs';
   $('kpiHarmBox').hidden = !offices;
   $('kpiHarm').textContent = p.harmfulTrades;
@@ -132,8 +136,9 @@ function renderMap(p) {
   right.classList.add('has-map');
   const highlight = Date.now() < flash.until ? flash.set : new Set();
   Offices.renderOfficeMap($('map'), p.grid, { showNames: last.admin && $('optNames').checked, highlight });
+  const hasEmpty = p.grid.cells.some(c => c && c.kind === 'phantom');
   $('legend').innerHTML = [1, 2, 3, 4, 5].map(t => Offices.typeChip(t, ` ${Offices.TYPE_WORDS[t - 1]}`)).join(' ') +
-    ' <span class="type-chip phantom-chip">·</span> empty (fixed neighbor)';
+    (hasEmpty ? ' <span class="type-chip phantom-chip">·</span> empty (fixed neighbor)' : '');
   sizeMap(p.grid);
 }
 
