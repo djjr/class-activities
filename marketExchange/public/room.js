@@ -26,8 +26,14 @@ function render() {
   if (!p) {
     $('phaseLabel').textContent = 'No phase yet';
     $('roundLabel').textContent = `Session ${m.session.code} · choose a phase below once students have joined`;
+    // Reset everything the previous session drew, so a New session looks new.
     $('openBtn').disabled = true; $('closeBtn').hidden = true; $('openBtn').hidden = false;
-    $('mapWrap').hidden = true; $('ticker').innerHTML = ''; $('chart').innerHTML = '';
+    $('openBtn').textContent = 'Open round 1';
+    $('optClassifieds').disabled = $('optMoney').disabled = false;
+    $('kpiWelfare').textContent = '–'; $('kpiShare').textContent = '–';
+    $('kpiShareLabel').textContent = 'of possible gain';
+    $('kpiHarmBox').hidden = $('kpiSortBox').hidden = true;
+    $('mapWrap').hidden = true; $('ticker').innerHTML = '<li class="muted">No trades yet.</li>'; $('chart').innerHTML = '';
     return;
   }
 
