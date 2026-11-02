@@ -9,6 +9,10 @@
 <body>
   <main class="narrow" style="max-width:560px">
     <h1>Fake class</h1>
+    <div id="framedWarn" class="bot-status wait" hidden>
+      This page is inside a frame (a slide?). Slides unload frames when you leave them, which stops the bots.
+      Open it in its own browser window instead: <a id="ownWindow" target="_blank">open in a new window ↗</a>
+    </div>
     <p class="muted">Adds bot students to the <b>current</b> session. They trade by simple rules whenever a round is open. Keep this tab open, and run the session from the room view in another tab.</p>
     <p class="small">Starting a new session and removing bots need the admin key: <span id="lock"></span></p>
     <div class="panel">
@@ -31,6 +35,11 @@
   <script src="/test/fake-class.js"></script>
   <script>
     adminGate(document.getElementById('lock'));
+    // Bots run in this page, so it must not live in a slide iframe.
+    if (window.top !== window.self) {
+      document.getElementById('framedWarn').hidden = false;
+      document.getElementById('ownWindow').href = location.href;
+    }
     let bots = null;
     const log = t => { const el = document.getElementById('log'); el.textContent = t + '\n' + el.textContent.slice(0, 4000); };
     document.getElementById('roomLink').href = `/i/room?key=${encodeURIComponent(KEY)}`;

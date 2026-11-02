@@ -49,7 +49,7 @@ A self-contained animation of 8 bot traders for explaining the game. No session 
 
 Bots join the current session and trade whenever a round is open.
 
-- In the browser: `/test/fake-class?key=…`, with the room view open in another tab. **Remove all bots from session** clears them out; they're left out of the next phase.
+- In the browser: `/test/fake-class?key=…`, with the room view open in another tab. **Keep this page in its own browser window, not on a slide:** the bots run inside the page, and slides.com unloads iframes when you leave their slide, which stops the bots. The page warns if it's loaded inside a frame. **Remove all bots from session** clears them out; they're left out of the next phase.
 - The page shows a **status line** for the bots: waiting for a phase, waiting for a round, trading, or "joined after this phase started" (they'll join the next phase). Bots only trade while a round is open.
 - The bots keep trading when the fake-class tab is in the background (their timer runs in a Web Worker, which browsers don't slow down the way they slow background tabs).
 - "Start a new session first" needs the admin key: unlock on the page first, or untick it to join the current session.
