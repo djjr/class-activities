@@ -50,6 +50,9 @@ A self-contained animation of 8 bot traders for explaining the game. No session 
 Bots join the current session and trade whenever a round is open.
 
 - In the browser: `/test/fake-class?key=…`, with the room view open in another tab. **Remove all bots from session** clears them out; they're left out of the next phase.
+- The page shows a **status line** for the bots: waiting for a phase, waiting for a round, trading, or "joined after this phase started" (they'll join the next phase). Bots only trade while a round is open.
+- The bots keep trading when the fake-class tab is in the background (their timer runs in a Web Worker, which browsers don't slow down the way they slow background tabs).
+- "Start a new session first" needs the admin key: unlock on the page first, or untick it to join the current session.
 - Bot nicknames are unique: a second batch joins as "Maya 2", "Jordan 2", and so on.
 - From a terminal: `npm run fake -- --url http://localhost:3000 --key dev --new`
 - Add `--drive` to run a whole scripted session (all three phases × ordinary / Classifieds / Money rounds) and print the welfare curves. `--round-secs 10` sets the round length.

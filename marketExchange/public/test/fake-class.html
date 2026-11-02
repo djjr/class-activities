@@ -23,6 +23,7 @@
         <button class="btn secondary" id="removeBots">Remove all bots from session</button>
       </div>
       <p><a id="roomLink" target="_blank">Open the room view ↗</a></p>
+      <div id="botStatus" class="bot-status" hidden></div>
     </div>
     <pre id="log" class="small muted" style="white-space:pre-wrap"></pre>
   </main>
@@ -33,13 +34,32 @@
     let bots = null;
     const log = t => { const el = document.getElementById('log'); el.textContent = t + '\n' + el.textContent.slice(0, 4000); };
     document.getElementById('roomLink').href = `/i/room?key=${encodeURIComponent(KEY)}`;
+    // Status line: what the bots are doing, refreshed every 2 s, so a closed
+    // round or a missed phase is obvious instead of the bots seeming idle.
+    let statusTimer = null;
+    function watchStatus() {
+      clearInterval(statusTimer);
+      const el = document.getElementById('botStatus');
+      const show = async () => {
+        if (!bots) { el.hidden = true; return; }
+        try { const s = await bots.status(); el.hidden = false; el.className = 'bot-status ' + (s.ok ? 'ok' : 'wait'); el.textContent = s.text; }
+        catch (e) { el.hidden = false; el.className = 'bot-status wait'; el.textContent = 'Session ended or not found. Join again.'; }
+      };
+      show(); statusTimer = setInterval(show, 2000);
+    }
+
     document.getElementById('go').onclick = async () => {
       try {
+        if (document.getElementById('fresh').checked && !document.body.classList.contains('is-admin')) {
+          log('To start a new session, unlock first (the 🔒 Unlock above), or untick "Start a new session first" to join the current one.');
+          return;
+        }
         if (document.getElementById('fresh').checked) await iapi('new', 'POST');
         const cur = await iapi('current');
         bots = FakeClass.createBots({ code: cur.code, n: Number(document.getElementById('n').value) || 18, log });
         await bots.join();
         bots.start();
+        watchStatus();
         document.getElementById('go').disabled = true;
         document.getElementById('stop').disabled = false;
         log('Bots are trading whenever a round is open.');

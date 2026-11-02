@@ -296,3 +296,8 @@ body:not(.is-admin) .admin-only { display: none !important; }
 .unlock-err { color: #b3261e; font-size: 13px; }
 .view-only-note { font-size: 13px; color: var(--muted); }
 body.is-admin .view-only-note { display: none; }
+
+/* fake-class page: what the bots are doing */
+.bot-status { margin-top: 10px; padding: 8px 12px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.bot-status.ok { background: #dff1e6; color: #1f5c38; }
+.bot-status.wait { background: #fff4c2; color: #6b4e00; }

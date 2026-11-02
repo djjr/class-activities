@@ -91,9 +91,32 @@
       },
       start() {
         if (timer) return;
-        timer = setInterval(() => bots.forEach(b => setTimeout(() => turn(b), Math.random() * tickMs)), tickMs);
+        const tick = () => bots.forEach(b => setTimeout(() => turn(b), Math.random() * tickMs));
+        // Browsers slow timers in background tabs to about once a minute,
+        // which would stall the bots while you watch the room view in another
+        // tab. A Web Worker's timer isn't throttled that way, so in the
+        // browser the worker sends the ticks. (Node just uses setInterval.)
+        if (typeof Worker !== 'undefined' && typeof Blob !== 'undefined') {
+          const src = `setInterval(() => postMessage(0), ${tickMs});`;
+          const w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+          w.onmessage = tick;
+          timer = { stop: () => w.terminate() };
+        } else {
+          const id = setInterval(tick, tickMs);
+          timer = { stop: () => clearInterval(id) };
+        }
       },
-      stop() { clearInterval(timer); timer = null; },
+      stop() { if (timer) timer.stop(); timer = null; },
+      // What the bots are doing right now, for the status line on the page.
+      async status() {
+        const st = await call(bots[0], 'state');
+        if (st.state === 'lobby') return { ok: false, text: 'Joined. Waiting for you to start a phase in the room view.' };
+        if (st.state === 'waiting-next-phase') return { ok: false, text: 'These bots joined after the current phase started, so they wait for the next phase (start a new phase in the room view).' };
+        const r = st.view.round;
+        if (!r) return { ok: false, text: 'Phase started. Open a round in the room view and the bots will trade.' };
+        if (!r.open) return { ok: false, text: `Round ${r.number} is closed. Open the next round to resume trading.` };
+        return { ok: true, text: `Trading in round ${r.number}${r.classifieds ? ' · classifieds' : ''}${r.money ? ' · money' : ''}.` };
+      },
     };
   }
 
