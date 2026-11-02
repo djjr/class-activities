@@ -112,25 +112,44 @@ function renderTicker(p) {
     setTimeout(render, 4100);
   }
   $('ticker').innerHTML = p.ticker.length ? p.ticker.map(t => {
-    const who = names ? `${esc(t.nameA)} ↔ ${esc(t.nameB)}` : 'Swap';
+    // Without names, skip the word "Swap": every line is a swap, and offices
+    // lines need the room to stay on one line at slide sizes.
+    const who = names ? `${esc(t.nameA)} ↔ ${esc(t.nameB)} · ` : (offices ? '' : 'Swap · ');
     const traders = t.dA + t.dB, neighbors = t.dRoom - traders;
-    const pay = t.pay ? ` · paid ${Math.abs(t.pay)}` : '';
+    const pay = t.pay ? `paid ${Math.abs(t.pay)} · ` : '';
     const detail = offices
       ? `traders ${signed(traders)} · neighbors ${signed(neighbors)} · room <b>${signed(t.dRoom)}</b>`
       : `room <b>${signed(t.dRoom)}</b>`;
-    return `<li class="${t.dRoom < -1e-9 ? 'harm' : ''}"><span class="t-round">R${t.round}</span> ${who}${pay} · ${detail}</li>`;
+    return `<li class="${t.dRoom < -1e-9 ? 'harm' : ''}"><span class="t-round">R${t.round}</span> ${who}${pay}${detail}</li>`;
   }).join('') : '<li class="muted">No trades yet.</li>';
 }
 
 // ---------------------------------------------------------------- map
 function renderMap(p) {
-  if (!p.grid) { $('mapWrap').hidden = true; return; }
+  const right = document.querySelector('.room-right');
+  if (!p.grid) { $('mapWrap').hidden = true; right.classList.remove('has-map'); return; }
   $('mapWrap').hidden = false;
+  right.classList.add('has-map');
   const highlight = Date.now() < flash.until ? flash.set : new Set();
   Offices.renderOfficeMap($('map'), p.grid, { showNames: last.admin && $('optNames').checked, highlight });
   $('legend').innerHTML = [1, 2, 3, 4, 5].map(t => Offices.typeChip(t, ` ${Offices.TYPE_WORDS[t - 1]}`)).join(' ') +
     ' <span class="type-chip phantom-chip">·</span> empty (fixed neighbor)';
+  sizeMap(p.grid);
 }
+
+// Square cells as large as fit in the map panel's remaining space, judged by
+// both width and height, so the map never pushes the trade list off screen.
+function sizeMap(grid) {
+  const wrap = $('mapWrap'), map = $('map'), gap = 4;
+  const cs = getComputedStyle(wrap);
+  const W = wrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const H = wrap.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - $('legend').offsetHeight - 8;
+  const cell = Math.max(18, Math.floor(Math.min((W - gap * (grid.cols - 1)) / grid.cols, (H - gap * (grid.rows - 1)) / grid.rows)));
+  map.style.gridTemplateColumns = `repeat(${grid.cols}, ${cell}px)`;
+  map.style.gridAutoRows = `${cell}px`;
+  map.style.setProperty('--cell', `${cell}px`);
+}
+if ('ResizeObserver' in window) new ResizeObserver(() => { if (last && last.phase && last.phase.grid) sizeMap(last.phase.grid); }).observe($('mapWrap'));
 
 // ---------------------------------------------------------------- history
 function renderHistory(h) {
